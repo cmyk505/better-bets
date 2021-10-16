@@ -18,8 +18,7 @@ class UserFollow(db.Model):
         db.Integer, db.ForeignKey("User.id"), nullable=False, primary_key=True
     )
     followed_id = db.Column(
-        db.Integer, db.ForeignKey("User.id", nullable=False, primary_key=True)
-    )
+        db.Integer, db.ForeignKey("User.id"), nullable=False, primary_key=True)
 
 
 class User(db.Model):
@@ -54,8 +53,8 @@ class UserBalance(db.Model):
 
 class Comment(db.Model):
     __tablename__ = "Comment"
-    commenter = db.Column(db.Integer, db.ForeignKey("User.id", nullable=False))
+    commenter = db.Column(db.Integer, db.ForeignKey("User.id"), nullable=False)
     id = db.Column(db.Integer, primary_key=True, unique=True)
     datetime = db.Column(db.DateTime)
     date = db.Column(db.Date, nullable=False)
-    event = db.Column(db.Integer, db.ForeignKey("Event.id", nullable=False))
+    event = db.Column(db.Integer, db.ForeignKey("Event.id"), nullable=False)
