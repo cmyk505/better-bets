@@ -44,6 +44,12 @@ class Event(db.Model):
     datetime = db.Column(db.DateTime)
     date = db.Column(db.Date, nullable=False)
 
+    # write methods
+    # 1 call api, use sqlalchemy to get event data, write to db
+    # 2 determine the winner
+    # 3 function that figures out what events need to updated.
+    # 4 function update the event records with the results
+
 
 class UserBalance(db.Model):
     __tablename__ = "UserBalance"
