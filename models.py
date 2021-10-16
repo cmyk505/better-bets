@@ -7,8 +7,8 @@ db = SQLAlchemy()
 def connect_db(app):
     db.app = app
     db.init_app(app)
-    db.drop_all
-    db.create_all()
+    # db.drop_all
+    # db.create_all()
 
 
 class UserFollow(db.Model):
@@ -18,7 +18,8 @@ class UserFollow(db.Model):
         db.Integer, db.ForeignKey("User.id"), nullable=False, primary_key=True
     )
     followed_id = db.Column(
-        db.Integer, db.ForeignKey("User.id"), nullable=False, primary_key=True)
+        db.Integer, db.ForeignKey("User.id"), nullable=False, primary_key=True
+    )
 
 
 class User(db.Model):
