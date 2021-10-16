@@ -11,11 +11,6 @@ def connect_db(app):
     db.create_all()
 
 
-class ExampleTable(db.Model):
-    __tablename__ = "example"
-    id = db.Column(db.Integer, primary_key=True)
-
-
 class UserFollow(db.Model):
     __tablename__ = "UserFollow"
     id = db.Column(db.Integer, unique=True)
