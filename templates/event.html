@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}event{% endblock %}
+
+{% block stylesheet %}
+<link rel="stylesheet" href="../static/event.css">{% endblock %}
+
+{% block content %}
+<h3 id="event-header">event title here</h3>
+
+<div id="event-container">
+    <p>Some details here about the event...</p>
+    <form action="submit" id="bet-form">
+        <label for="bet-selection">select winning team</label>
+        <select name="bet" id="bet-selection">
+            <option value="team_a">team a</option>
+            <option value="team-b">team b</option>
+        </select>
+        <button data-event_id={{id}} id="bet-btn">bet</button>
+    </form>
+    <div id="api-response-container"></div>
+</div>
+
+<script src="../static/event.js"></script>
+{% endblock %}

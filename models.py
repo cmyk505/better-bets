@@ -1,7 +1,10 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_bcrypt import Bcrypt
 
+# using bcrypt for password hashing
 db = SQLAlchemy()
+bcrypt = Bcrypt()
 
 
 def connect_db(app):
@@ -42,6 +45,7 @@ class Event(db.Model):
     home_score = db.Column(db.Integer)
     away_score = db.Column(db.Integer)
     datetime = db.Column(db.DateTime)
+    resolved = db.Column(db.Boolean)
     date = db.Column(db.Date, nullable=False)
 
     # write methods
@@ -58,10 +62,33 @@ class UserBalance(db.Model):
     balance = db.Column(db.Integer, nullable=False, default=500)
 
 
+class Bet(db.Model):
+    __tablename__ = "Bet"
+    id = db.Column(db.Integer, primary_key=True)
+    event = db.Column(db.Integer, db.ForeignKey("Event.id"), nullable=False)
+    selection = db.Column(db.String(100), nullable=False)
+    result = db.String(db.String(1))
+
+
 class Comment(db.Model):
     __tablename__ = "Comment"
     commenter = db.Column(db.Integer, db.ForeignKey("User.id"), nullable=False)
     id = db.Column(db.Integer, primary_key=True, unique=True)
     datetime = db.Column(db.DateTime)
     date = db.Column(db.Date, nullable=False)
+    comment = db.Column(db.String(500), nullable=False)
     event = db.Column(db.Integer, db.ForeignKey("Event.id"), nullable=False)
+
+    @classmethod
+    def add_comment(cls, commenter, comment, event):
+        import datetime
+
+        date = str(datetime.datetime.today()).split()[0]
+        datetime = datetime.datetime.now()
+        return cls(
+            commenter=commenter,
+            datetime=datetime,
+            date=date,
+            comment=comment,
+            event=event,
+        )

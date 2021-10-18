@@ -1,0 +1,23 @@
+#event-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#bet-btn {
+  width: 20%;
+  margin-left: 40%;
+  margin-top: 10px;
+}
+
+#bet-btn:hover {
+  cursor: pointer;
+}
+
+#bet-btn:disabled {
+  cursor: default;
+}
+
+#event-header {
+  text-align: center;
+}
