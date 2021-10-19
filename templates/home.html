@@ -10,6 +10,15 @@
 
     <div class="event-container">
         <h1>events</h1>
+        {% for event in events %}
+        <div class="event-card">
+            <p>{{event.title}}</p>
+            <ul>
+                <li>{{event.home_team}} vs {{event.away_team}}</li>
+                <li>{{event.date}}</li>
+            </ul>
+        </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

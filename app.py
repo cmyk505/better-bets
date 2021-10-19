@@ -10,13 +10,12 @@ from flask import (
 )
 import os
 import json
-
-from models import db, connect_db, Bet
+from datetime import date
+from models import db, connect_db, Bet, Event
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
-    "DATABASE_URL", "SQLALCHEMY_DATABASE_URI"
-)
+app.config["FLASK_ENV"] = os.environ.get("FLASK_ENV")
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DATABASE_URI")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 app.config["SECRET_KEY"] = "my secret"
@@ -26,12 +25,21 @@ connect_db(app)
 
 @app.route("/")
 def render_home_page():
-    return render_template("home.html")
+    """Render home page with 10 upcoming events"""
+
+    events = Event.query.filter(Event.date >= date.today()).limit(10)
+
+    return render_template("home.html", events=events)
 
 
 @app.route("/event/<id>")
 def render_event(id):
     return render_template("event.html", id=id)
+
+
+# @app.route("/account")
+# def render_account():
+#     return render_template('account.html')
 
 
 # API endpoints called from JS event listener to make bet
