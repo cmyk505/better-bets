@@ -12,6 +12,7 @@ import os
 import json
 from datetime import date
 from models import db, connect_db, Bet, Event
+from forms import RegistrationForm, LoginForm
 
 app = Flask(__name__)
 app.config["FLASK_ENV"] = os.environ.get("FLASK_ENV")
@@ -31,6 +32,15 @@ def render_home_page():
 
     return render_template("home.html", events=events)
 
+@app.route("/register")
+def register():
+    form = RegistrationForm()
+    return render_template('register.html', title='Register', form=form)
+
+@app.route("/login")
+def login():
+    form = LoginForm()
+    return render_template('login.html', title='Login', form=form)
 
 @app.route("/event/<id>")
 def render_event(id):
