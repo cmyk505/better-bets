@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}home{% endblock %}
+{% block stylesheet %}
+<link rel="stylesheet" href="../static/home.css"> {% endblock %}
+{% block content %}
+
+<div class="top-container">
+    <h1>home</h1>
+
+    <div class="event-container">
+        <h1>events</h1>
+        {% for event in events %}
+        <div class="event-card">
+            <p>{{event.title}}</p>
+            <ul>
+                <li>{{event.home_team}} vs {{event.away_team}}</li>
+                <li>{{event.date}}</li>
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
