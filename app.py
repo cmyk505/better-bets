@@ -51,3 +51,8 @@ def place_bet():
     json_data = json.loads(request.data)
     print("pause")
     return json.dumps({"text": f"You bet on {json_data['selection']}"})
+
+@app.route("/test")
+def test():
+    return "Hello World"
+
