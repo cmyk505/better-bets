@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from faker import Faker
@@ -12,14 +12,14 @@ def connect_db(app):
     db.app = app
     db.init_app(app)
     if app.config["FLASK_ENV"] == "development":
-        User.query.delete()
-        Event.query.delete()
-        db.drop_all
+        # User.query.delete()
+        # Event.query.delete()
+        db.drop_all()
         db.create_all()
-        seed_database(db)
+        seed_database(app, db)
 
 
-def seed_database(db):
+def seed_database(app, db):
     """Seed database with test data"""
 
     faker = Faker()
@@ -43,17 +43,18 @@ def seed_database(db):
                 )
             )
         )
-        db.session.commit()
+    db.session.commit()
+    # add user ID of 1 to session ID so we can simulate logged-in user activity
 
 
 class UserFollow(db.Model):
     __tablename__ = "user_follow"
     id = db.Column(db.Integer, unique=True)
     follower_id = db.Column(
-        db.Integer, db.ForeignKey("user.id"), nullable=False, primary_key=True
+        db.Integer, db.ForeignKey("users.id"), nullable=False, primary_key=True
     )
     followed_id = db.Column(
-        db.Integer, db.ForeignKey("user.id"), nullable=False, primary_key=True
+        db.Integer, db.ForeignKey("users.id"), nullable=False, primary_key=True
     )
 
 
@@ -77,7 +78,7 @@ class Event(db.Model):
     home_score = db.Column(db.Integer)
     away_score = db.Column(db.Integer)
     datetime = db.Column(db.DateTime)
-    resolved = db.Column(db.Boolean)
+    resolved = db.Column(db.Boolean, default=False)
     date = db.Column(db.Date, nullable=False)
 
     # write methods
@@ -90,21 +91,23 @@ class Event(db.Model):
 class UserBalance(db.Model):
     __tablename__ = "user_balance"
     id = db.Column(db.Integer, primary_key=True, unique=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     balance = db.Column(db.Integer, nullable=False, default=500)
 
 
 class Bet(db.Model):
     __tablename__ = "bet"
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     event = db.Column(db.Integer, db.ForeignKey("event.id"), nullable=False)
     selection = db.Column(db.String(100), nullable=False)
     result = db.String(db.String(1))
+    amount = db.Column(db.Integer, nullable=False)
 
 
 class Comment(db.Model):
     __tablename__ = "comment"
-    commenter = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    commenter = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     id = db.Column(db.Integer, primary_key=True, unique=True)
     datetime = db.Column(db.DateTime)
     date = db.Column(db.Date, nullable=False)

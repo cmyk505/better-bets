@@ -6,17 +6,24 @@
 <link rel="stylesheet" href="../static/event.css">{% endblock %}
 
 {% block content %}
-<h3 id="event-header">event title here</h3>
+<h3 id="event-header">{{event.title}}</h3>
 
 <div id="event-container">
     <p>Some details here about the event...</p>
     <form action="submit" id="bet-form">
         <label for="bet-selection">select winning team</label>
         <select name="bet" id="bet-selection">
-            <option value="team_a">team a</option>
-            <option value="team-b">team b</option>
+            <option value="{{event.home_team}}">{{event.home_team}}</option>
+            <option value="{{event.away_team}}">{{event.away_team}}</option>
         </select>
-        <button data-event_id={{id}} id="bet-btn">bet</button>
+        <label>amount</label>
+        <input type="number" name="amount" id="bet-amt" min=1 max=1000>
+        {% if bet_on %}
+        <p>Your bet: {{bet.amount}}</p>>
+        <p>Result:</p>
+        {% else %}
+        <button data-event_id={{event.id}} id="bet-btn">bet</button>
+        {% endif %}
     </form>
     <div id="api-response-container"></div>
 </div>

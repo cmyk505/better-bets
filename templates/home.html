@@ -9,10 +9,12 @@
     <h1>home</h1>
 
     <div class="event-container">
-        <h1>events</h1>
+        <h1 id="event-header">events</h1>
         {% for event in events %}
         <div class="event-card">
-            <p>{{event.title}}</p>
+            <a href="/event/{{event.id}}">
+                <p>{{event.title}}</p>
+            </a>
             <ul>
                 <li>{{event.home_team}} vs {{event.away_team}}</li>
                 <li>{{event.date}}</li>

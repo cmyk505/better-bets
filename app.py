@@ -34,7 +34,13 @@ def render_home_page():
 
 @app.route("/event/<id>")
 def render_event(id):
-    return render_template("event.html", id=id)
+    event = Event.query.get(id)
+    bet = Bet.query.filter(
+        Bet.event == event.id, Bet.user_id == session.get("user_id", 1)
+    ).first()
+    print(bet)
+    bet_on = False if bet == None else True
+    return render_template("event.html", event=event, bet_on=bet_on, bet=bet)
 
 
 # @app.route("/account")
@@ -47,7 +53,36 @@ def render_event(id):
 
 @app.route("/api/bet", methods=["POST"])
 def place_bet():
-    """Receives JSON posted from JS event listener with 1) event ID user is betting on 2) user's bet. We can retrieve current user ID from Flask session"""
+    """Receives JSON posted from JS event listener with 1) event ID user is betting on 2) user's bet. We can retrieve current user ID from Flask session to update database"""
+    json_data = json.loads(request.data)
+    # get the selection + event ID + amt the user bet
+    selection = json_data["selection"]
+    amount = json_data["betAmt"]
+    event = Event.query.get(json_data["eventId"])
+
+    # add Bet record in database
+    db.session.add(
+        Bet(
+            event=event.id,
+            selection=selection,
+            amount=int(amount),
+            user_id=session.get("logged_in_user", 1),
+        )
+    )
+    db.session.commit()
+    return json.dumps({"text": f"You bet on {selection}"})
+
+
+@app.route("/api/bet", methods=["PATCH"])
+def update_bet():
+    """Receives JSON posted from JS event listener with 1) event ID user is updating 2) user's update and then updates database"""
+    json_data = json.loads(request.data)
+    event = Event.query.get(json_data["eventId"])
+
+
+@app.route("/api/bet", methods=["DELETE"])
+def delete_bet():
+    """Receives JSON posted from JS event listener with event ID user is deleting and updates database"""
     json_data = json.loads(request.data)
     print("pause")
     return json.dumps({"text": f"You bet on {json_data['selection']}"})
