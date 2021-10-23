@@ -79,6 +79,7 @@ class Event(db.Model):
     away_score = db.Column(db.Integer)
     datetime = db.Column(db.DateTime)
     resolved = db.Column(db.Boolean, default=False)
+    winner = db.Column(db.String(50), default="Undecided")
     date = db.Column(db.Date, nullable=False)
 
     # write methods
@@ -102,6 +103,7 @@ class Bet(db.Model):
     event = db.Column(db.Integer, db.ForeignKey("event.id"), nullable=False)
     selection = db.Column(db.String(100), nullable=False)
     result = db.String(db.String(1))
+    final_margin = db.Column(db.Integer, default=0)
     amount = db.Column(db.Integer, nullable=False)
 
 

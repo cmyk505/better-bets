@@ -35,12 +35,18 @@ def render_home_page():
 @app.route("/event/<id>")
 def render_event(id):
     event = Event.query.get(id)
-    bet = Bet.query.filter(
-        Bet.event == event.id, Bet.user_id == session.get("user_id", 1)
-    ).first()
-    print(bet)
+    if event is not None:
+        bet = Bet.query.filter(
+            Bet.event == event.id, Bet.user_id == session.get("user_id", 1)
+        ).first()
+    else:
+        return redirect("/")
+    # redirect to home if event does not exist
     bet_on = False if bet == None else True
-    return render_template("event.html", event=event, bet_on=bet_on, bet=bet)
+    result = event.winner
+    return render_template(
+        "event.html", event=event, bet_on=bet_on, bet=bet, result=result
+    )
 
 
 # @app.route("/account")
@@ -54,6 +60,7 @@ def render_event(id):
 @app.route("/api/bet", methods=["POST"])
 def place_bet():
     """Receives JSON posted from JS event listener with 1) event ID user is betting on 2) user's bet. We can retrieve current user ID from Flask session to update database"""
+    # TODO these routes should be protected/have validation
     json_data = json.loads(request.data)
     # get the selection + event ID + amt the user bet
     selection = json_data["selection"]

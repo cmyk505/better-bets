@@ -13,5 +13,15 @@ document.querySelector("#bet-form").addEventListener("submit", async e => {
 
   document.querySelector("#api-response-container").append(res.text);
   document.querySelector("#bet-btn").disabled = true;
-  location.reload();
+});
+
+document.querySelector("#bet-container").addEventListener(onload, async e => {
+  //upon page load, check if user has already made bet on event and render content accordingly
+  const div = document.querySelector("#bet-details");
+
+  const content = await fetch("/api/bet/content").then(response =>
+    response.json()
+  );
+
+  div.append(content);
 });
