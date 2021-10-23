@@ -1,13 +1,5 @@
-from flask import (
-    Flask,
-    request,
-    redirect,
-    render_template,
-    url_for,
-    flash,
-    jsonify,
-    session,
-)
+from flask import Flask, request, redirect, render_template, url_for, flash, jsonify, session
+
 import os
 import json
 from datetime import date
