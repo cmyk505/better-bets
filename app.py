@@ -22,6 +22,8 @@ app.config["SECRET_KEY"] = "my secret"
 
 connect_db(app)
 
+from scheduler import start
+
 
 @app.route("/")
 def render_home_page():
@@ -93,3 +95,19 @@ def delete_bet():
     json_data = json.loads(request.data)
     print("pause")
     return json.dumps({"text": f"You bet on {json_data['selection']}"})
+
+
+# Route for use testing scheduling functionality
+
+
+@app.route("/test_scheduler", methods=["GET"])
+def render_schedule():
+    """Renders template with button that calls JS to test scheduling functionality"""
+    return render_template("test_scheduler.html")
+
+
+@app.route("/test_scheduler", methods=["POST"])
+def schedule():
+    """Runs scheduler"""
+    start()
+    return json.dumps({"result": "some result"})
