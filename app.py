@@ -27,6 +27,9 @@ def render_home_page():
 @app.route("/register", methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
+    if form.validate_on_submit():
+        flash(f'Account created for {form.email.data}! 🙌🏼', 'success')
+        return redirect(url_for('render_home_page'))
     return render_template('register.html', title='Register', form=form)
 
 @app.route("/login", methods=['GET', 'POST'])
