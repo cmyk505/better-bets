@@ -12,6 +12,8 @@ import os
 import json
 from datetime import date
 from models import db, connect_db, Bet, Event
+from flask_socketio import SocketIO, emit, disconnect
+from variables import clients
 
 app = Flask(__name__)
 app.config["FLASK_ENV"] = os.environ.get("FLASK_ENV")
@@ -19,10 +21,11 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DATABASE_URI"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 app.config["SECRET_KEY"] = "my secret"
+socket_ = SocketIO(app)
 
 connect_db(app)
-
-from scheduler import start
+socket_.run(app, debug=True)
+from scheduler import start, stop
 
 
 @app.route("/")
@@ -106,8 +109,37 @@ def render_schedule():
     return render_template("test_scheduler.html")
 
 
-@app.route("/test_scheduler", methods=["POST"])
-def schedule():
+@app.route("/start", methods=["POST"])
+def schedule_start():
     """Runs scheduler"""
     start()
-    return json.dumps({"result": "some result"})
+    return json.dumps({"result": "started"})
+
+
+@app.route("/stop", methods=["POST"])
+def schedule_stop():
+    """Stops scheduler"""
+    stop()
+    return json.dumps({"result": "stopped"})
+
+
+@socket_.on("my event")
+def get_initial_message(data):
+    print(data)
+
+
+@socket_.on("connect")
+def handle_connect():
+    print("Client connected")
+    clients.append(request.sid)
+
+
+@socket_.on("disconnect")
+def handle_disconnect():
+    print("Client disconnected")
+    clients.remove(request.sid)
+
+
+# @socket_.on("message")
+# def send_message():
+#     emit("my response", {"data": "sending a message here"})
