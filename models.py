@@ -11,6 +11,8 @@ bcrypt = Bcrypt()
 def connect_db(app):
     db.app = app
     db.init_app(app)
+    # liao local environment:  comment out if clause
+    # because you're not using .env file
     if app.config["FLASK_ENV"] == "development":
         # User.query.delete()
         # Event.query.delete()
@@ -47,6 +49,16 @@ def seed_database(app, db):
     # add user ID of 1 to session ID so we can simulate logged-in user activity
 
 
+
+class User(db.Model):
+    __tablename__ = "users"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True, unique=True)
+    first_name = db.Column(db.String(100), nullable=False)
+    last_name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(200), nullable=False, unique=True)
+    hashed_password = db.Column(db.String(100), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
+
 class UserFollow(db.Model):
     __tablename__ = "user_follow"
     id = db.Column(db.Integer, unique=True)
@@ -58,14 +70,7 @@ class UserFollow(db.Model):
     )
 
 
-class User(db.Model):
-    __tablename__ = "users"
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True, unique=True)
-    first_name = db.Column(db.String(100), nullable=False)
-    last_name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(200), nullable=False, unique=True)
-    hashed_password = db.Column(db.String(100), nullable=False)
-    is_admin = db.Column(db.Boolean, default=False)
+
 
 
 class Event(db.Model):
