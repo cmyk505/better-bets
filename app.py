@@ -7,6 +7,9 @@ from models import db, connect_db, Bet, Event
 from forms import RegistrationForm, LoginForm
 
 app = Flask(__name__)
+# David local env: not using .env
+# app.config["FLASK_ENV"] = os.environ.get("FLASK_ENV")
+# app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DATABASE_URI")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:heize_stan@localhost/postgres'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
