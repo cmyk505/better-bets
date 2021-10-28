@@ -3,7 +3,7 @@ from flask import Flask, request, redirect, render_template, url_for, flash, jso
 import os
 import json
 from datetime import date
-from models import db, connect_db, Bet, Event
+from models import db, connect_db, Bet, Event, bcrypt, User
 from forms import RegistrationForm, LoginForm
 
 app = Flask(__name__)
@@ -31,8 +31,12 @@ def render_home_page():
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        flash(f'Account created for {form.email.data}! 🙌🏼', 'success')
-        return redirect(url_for('render_home_page'))
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        user = User(first_name=form.first_name.data, last_name=form.last_name.data, email=form.email.data, hashed_password=hashed_password)
+        db.session.add(user)
+        db.session.commit()
+        flash(f'Account created for {form.email.data}!🙌🏼 You can now log in.', 'success')
+        return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
 
 @app.route("/login", methods=['GET', 'POST'])

@@ -58,6 +58,11 @@ class User(db.Model):
     email = db.Column(db.String(200), nullable=False, unique=True)
     hashed_password = db.Column(db.String(100), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
+    image_file = db.Column(db.String(50), nullable=False, default='defaultProfilePic.jpg')
+
+
+    def __repr__(self):
+        return f"User('{self.first_name}', '{self.last_name}', '{self.image_file}')"
 
 class UserFollow(db.Model):
     __tablename__ = "user_follow"
@@ -68,9 +73,6 @@ class UserFollow(db.Model):
     followed_id = db.Column(
         db.Integer, db.ForeignKey("users.id"), nullable=False, primary_key=True
     )
-
-
-
 
 
 class Event(db.Model):
