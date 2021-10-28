@@ -1,4 +1,13 @@
-from flask import Flask, request, redirect, render_template, url_for, flash, jsonify, session
+from flask import (
+    Flask,
+    request,
+    redirect,
+    render_template,
+    url_for,
+    flash,
+    jsonify,
+    session,
+)
 
 import os
 import json
@@ -26,18 +35,21 @@ def render_home_page():
 
     return render_template("home.html", events=events)
 
-@app.route("/register", methods=['GET', 'POST'])
+
+@app.route("/register", methods=["GET", "POST"])
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        flash(f'Account created for {form.email.data}! 🙌🏼', 'success')
-        return redirect(url_for('render_home_page'))
-    return render_template('register.html', title='Register', form=form)
+        flash(f"Account created for {form.email.data}! 🙌🏼", "success")
+        return redirect(url_for("render_home_page"))
+    return render_template("register.html", title="Register", form=form)
 
-@app.route("/login", methods=['GET', 'POST'])
+
+@app.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
-    return render_template('login.html', title='Login', form=form)
+    return render_template("login.html", title="Login", form=form)
+
 
 @app.route("/event/<id>")
 def render_event(id):
@@ -100,6 +112,3 @@ def delete_bet():
     json_data = json.loads(request.data)
     print("pause")
     return json.dumps({"text": f"You bet on {json_data['selection']}"})
-
-if __name__ == '__main__':
-    app.run(debug=True)
