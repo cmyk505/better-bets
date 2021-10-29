@@ -37,11 +37,4 @@ tomli==1.2.1
 typing-extensions==3.10.0.2
 tzlocal==2.1
 Werkzeug==2.0.2
-<<<<<<< HEAD
-wsproto==1.0.0
 WTForms==2.3.3
-zope.event==4.5.0
-zope.interface==5.4.0
-=======
-WTForms==2.3.3
->>>>>>> 75eabbdd5e6db4e33083e03e7ad7ddd05fad15d3

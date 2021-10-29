@@ -9,6 +9,8 @@ from flask import (
     session,
 )
 
+from helpers import convert_to_named_tuple
+
 from flask_login import (
     LoginManager,
     UserMixin,
@@ -21,9 +23,19 @@ from flask_login import (
 import os
 import json
 from datetime import date
-from models import db, connect_db, Bet, Event, bcrypt, User, LoginManager, UserMixin, login_manager
+from models import (
+    db,
+    connect_db,
+    Bet,
+    Event,
+    bcrypt,
+    User,
+    UserBalance,
+    LoginManager,
+    UserMixin,
+    login_manager,
+)
 from forms import RegistrationForm, LoginForm
-<<<<<<< HEAD
 from models import User
 
 login_manager = LoginManager()
@@ -32,16 +44,6 @@ app = Flask(__name__)
 app.config["FLASK_ENV"] = os.environ.get("FLASK_ENV")
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DATABASE_URI")
 # For David's local env:  app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:heize_stan@localhost/postgres'
-=======
-from flask_login import login_user
-
-
-app = Flask(__name__)
-# David local env: not using .env
-# app.config["FLASK_ENV"] = os.environ.get("FLASK_ENV")
-# app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DATABASE_URI")
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:heize_stan@localhost/postgres'
->>>>>>> 75eabbdd5e6db4e33083e03e7ad7ddd05fad15d3
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 app.config["SECRET_KEY"] = "my secret"
@@ -70,38 +72,53 @@ def render_home_page():
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-<<<<<<< HEAD
-        flash(f"Account created for {form.email.data}! 🙌🏼", "success")
-        return redirect(url_for("render_home_page"))
-    return render_template("register.html", title="Register", form=form)
-=======
-        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = User(first_name=form.first_name.data, last_name=form.last_name.data, email=form.email.data, hashed_password=hashed_password)
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode(
+            "utf-8"
+        )
+        user = User(
+            first_name=form.first_name.data,
+            last_name=form.last_name.data,
+            email=form.email.data,
+            hashed_password=hashed_password,
+        )
         db.session.add(user)
         db.session.commit()
-        flash(f'Account created for {form.email.data}!🙌🏼 You can now log in.', 'success')
-        return redirect(url_for('login'))
-    return render_template('register.html', title='Register', form=form)
->>>>>>> 75eabbdd5e6db4e33083e03e7ad7ddd05fad15d3
+        flash(
+            f"Account created for {form.email.data}!🙌🏼 You can now log in.", "success"
+        )
+
+        # create UserBalance record in DB
+        res = db.session.execute(
+            "SELECT * from users WHERE id = (SELECT max(id) FROM users)"
+        )
+        new_id = None
+        for r in res:
+            user_id = r[0]
+        user_balance = UserBalance(user_id=user_id)
+
+        db.session.add(user_balance)
+        db.session.commit()
+        return redirect(url_for("login"))
+    return render_template("register.html", title="Register", form=form)
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
-<<<<<<< HEAD
-    return render_template("login.html", title="Login", form=form)
-
-=======
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
-        if user and bcrypt.check_password_hash(user.hashed_password, form.password.data):
-            login_user(user, remember=False)  # by default, the user is logged out if browser is closed
-            flash(f'Hi {user.first_name}! You are logged in.')
-            return redirect(url_for('home'))
+        if user and bcrypt.check_password_hash(
+            user.hashed_password, form.password.data
+        ):
+            login_user(
+                user, remember=False
+            )  # by default, the user is logged out if browser is closed
+            flash(f"Hi {user.first_name}! You are logged in.")
+            return redirect(url_for("render_home_page"))
         else:
-            flash(f'Login Unsuccessful. Please check email and password')
-    return render_template('login.html', title='Login', form=form)
->>>>>>> 75eabbdd5e6db4e33083e03e7ad7ddd05fad15d3
+            flash(f"Login Unsuccessful. Please check email and password")
+    return render_template("login.html", title="Login", form=form)
+
 
 @app.route("/event/<id>")
 def render_event(id):
@@ -129,6 +146,7 @@ def render_event(id):
 
 
 @app.route("/api/bet", methods=["POST"])
+@login_required
 def place_bet():
     """Receives JSON posted from JS event listener with 1) event ID user is betting on 2) user's bet. We can retrieve current user ID from Flask session to update database"""
     # TODO these routes should be protected/have validation
@@ -144,11 +162,24 @@ def place_bet():
             event=event.id,
             selection=selection,
             amount=int(amount),
-            user_id=session.get("logged_in_user", 1),
+            user_id=current_user.id,
         )
     )
-    db.session.commit()
-    return json.dumps({"text": f"You bet on {selection}"})
+
+    # get current user balance, then update it
+    user_balance = convert_to_named_tuple(
+        db.session.execute(
+            "SELECT balance FROM user_balance WHERE user_id = :user_id",
+            {"user_id": current_user.id},
+        )
+    )[0].balance
+
+    new_balance = user_balance - int(amount)
+    db.session.execute(
+        "UPDATE user_balance SET balance = :new_balance WHERE user_id = :id",
+        {"new_balance": new_balance, "id": current_user.id},
+    )
+    return json.dumps({"text": f"You bet on {selection}. New balance is {new_balance}"})
 
 
 @app.route("/api/bet", methods=["PATCH"])

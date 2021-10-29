@@ -1,74 +1,3 @@
-<<<<<<< HEAD
-{% extends 'base.html' %}
-
-{% block title %}Register{% endblock %}
-{% block stylesheet %}{% endblock %}
-
-{% block content %}
-<div>
-    <form method="POST" action="">
-        {{ form.hidden_tag() }}
-        <!--All of the classes listed in the form-group below are for future bootstrap implementation-->
-        <fieldset class="form-group">
-            <legend class="border-bottom">Signup</legend>
-            <div class="form-group">
-                {{ form.email.label(class="form-control-label") }}
-                <!-- The following validation code relies on bootstrap, which has not been implemented in base.html yet. -->
-                {% if form.email.errors %}
-                    {{ form.email(class="form-control is-invalid") }}
-                    <div class="invalid-feedback">
-                        {% for error in form.email.errors %}
-                            <span>
-                                {{ error }}
-                            </span>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    {{ form.email(class="form-control") }}
-                {% endif %}
-            </div>
-            <div class="form-group">
-                {{ form.password.label(class="form-control-label") }}
-                {% if form.password.errors %}
-                    {{ form.password(class="form-control is-invalid") }}
-                    <div class="invalid-feedback">
-                        {% for error in form.password.errors %}
-                            <span>
-                                {{ error }}
-                            </span>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    {{ form.password(class="form-control") }}
-                {% endif %}
-            </div>
-            <div class="form-group">
-                {{ form.confirm_password.label(class="form-control-label") }}
-                {% if form.confirm_password.errors %}
-                    {{ form.confirm_password(class="form-control is-invalid") }}
-                    <div class="invalid-feedback">
-                        {% for error in form.confirm_password.errors %}
-                            <span>
-                                {{ error }}
-                            </span>
-                        {% endfor %}
-                    </div>
-                {% else %}
-                    {{ form.confirm_password(class="form-control") }}
-                {% endif %}
-            </div>
-        </fieldset>
-        <div class="form-group">
-            {{ form.submit(class="btn btn-primary") }}
-        </div>
-    </form>
-</div>
-<div>
-    <small>
-        Already have an account? <a href="{{ url_for('login') }}">Sign In</a>
-    </small>
-</div>
-=======
 {% extends 'base.html' %}
 
 {% block title %}Register{% endblock %}
@@ -86,16 +15,16 @@
                 {{ form.first_name.label(class="form-control-label") }}
                 <!-- The following validation code relies on bootstrap, which has not been implemented in base.html yet. -->
                 {% if form.first_name.errors %}
-                    {{ form.first_name(class="form-control is-invalid") }}
-                    <div class="invalid-feedback">
-                        {% for error in form.first_name.errors %}
-                            <span>
-                                {{ error }}
-                            </span>
-                        {% endfor %}
-                    </div>
+                {{ form.first_name(class="form-control is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.first_name.errors %}
+                    <span>
+                        {{ error }}
+                    </span>
+                    {% endfor %}
+                </div>
                 {% else %}
-                    {{ form.first_name(class="form-control") }}
+                {{ form.first_name(class="form-control") }}
                 {% endif %}
             </div>
 
@@ -103,16 +32,16 @@
                 {{ form.last_name.label(class="form-control-label") }}
                 <!-- The following validation code relies on bootstrap, which has not been implemented in base.html yet. -->
                 {% if form.last_name.errors %}
-                    {{ form.last_name(class="form-control is-invalid") }}
-                    <div class="invalid-feedback">
-                        {% for error in form.last_name.errors %}
-                            <span>
-                                {{ error }}
-                            </span>
-                        {% endfor %}
-                    </div>
+                {{ form.last_name(class="form-control is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.last_name.errors %}
+                    <span>
+                        {{ error }}
+                    </span>
+                    {% endfor %}
+                </div>
                 {% else %}
-                    {{ form.last_name(class="form-control") }}
+                {{ form.last_name(class="form-control") }}
                 {% endif %}
             </div>
 
@@ -120,46 +49,46 @@
                 {{ form.email.label(class="form-control-label") }}
                 <!-- The following validation code relies on bootstrap, which has not been implemented in base.html yet. -->
                 {% if form.email.errors %}
-                    {{ form.email(class="form-control is-invalid") }}
-                    <div class="invalid-feedback">
-                        {% for error in form.email.errors %}
-                            <span>
-                                {{ error }}
-                            </span>
-                        {% endfor %}
-                    </div>
+                {{ form.email(class="form-control is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.email.errors %}
+                    <span>
+                        {{ error }}
+                    </span>
+                    {% endfor %}
+                </div>
                 {% else %}
-                    {{ form.email(class="form-control") }}
+                {{ form.email(class="form-control") }}
                 {% endif %}
             </div>
             <div class="form-group">
                 {{ form.password.label(class="form-control-label") }}
                 {% if form.password.errors %}
-                    {{ form.password(class="form-control is-invalid") }}
-                    <div class="invalid-feedback">
-                        {% for error in form.password.errors %}
-                            <span>
-                                {{ error }}
-                            </span>
-                        {% endfor %}
-                    </div>
+                {{ form.password(class="form-control is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.password.errors %}
+                    <span>
+                        {{ error }}
+                    </span>
+                    {% endfor %}
+                </div>
                 {% else %}
-                    {{ form.password(class="form-control") }}
+                {{ form.password(class="form-control") }}
                 {% endif %}
             </div>
             <div class="form-group">
                 {{ form.confirm_password.label(class="form-control-label") }}
                 {% if form.confirm_password.errors %}
-                    {{ form.confirm_password(class="form-control is-invalid") }}
-                    <div class="invalid-feedback">
-                        {% for error in form.confirm_password.errors %}
-                            <span>
-                                {{ error }}
-                            </span>
-                        {% endfor %}
-                    </div>
+                {{ form.confirm_password(class="form-control is-invalid") }}
+                <div class="invalid-feedback">
+                    {% for error in form.confirm_password.errors %}
+                    <span>
+                        {{ error }}
+                    </span>
+                    {% endfor %}
+                </div>
                 {% else %}
-                    {{ form.confirm_password(class="form-control") }}
+                {{ form.confirm_password(class="form-control") }}
                 {% endif %}
             </div>
         </fieldset>
@@ -173,5 +102,4 @@
         Already have an account? <a href="{{ url_for('login') }}">Sign In</a>
     </small>
 </div>
->>>>>>> 75eabbdd5e6db4e33083e03e7ad7ddd05fad15d3
 {% endblock %}
