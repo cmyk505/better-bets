@@ -3,8 +3,10 @@ from flask import Flask, request, redirect, render_template, url_for, flash, jso
 import os
 import json
 from datetime import date
-from models import db, connect_db, Bet, Event, bcrypt, User
+from models import db, connect_db, Bet, Event, bcrypt, User, LoginManager, UserMixin, login_manager
 from forms import RegistrationForm, LoginForm
+from flask_login import login_user
+
 
 app = Flask(__name__)
 # David local env: not using .env
@@ -42,6 +44,14 @@ def register():
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user and bcrypt.check_password_hash(user.hashed_password, form.password.data):
+            login_user(user, remember=False)  # by default, the user is logged out if browser is closed
+            flash(f'Hi {user.first_name}! You are logged in.')
+            return redirect(url_for('home'))
+        else:
+            flash(f'Login Unsuccessful. Please check email and password')
     return render_template('login.html', title='Login', form=form)
 
 @app.route("/event/<id>")

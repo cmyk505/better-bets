@@ -2,10 +2,12 @@ from flask import Flask, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from faker import Faker
+from flask_login import LoginManager, UserMixin
 
 # using bcrypt for password hashing
 db = SQLAlchemy()
 bcrypt = Bcrypt()
+login_manager = LoginManager()
 
 
 def connect_db(app):
@@ -16,9 +18,9 @@ def connect_db(app):
     # if app.config["FLASK_ENV"] == "development":
         # User.query.delete()
         # Event.query.delete()
-    db.drop_all()
-    db.create_all()
-    seed_database(app, db)
+    # db.drop_all()
+    # db.create_all()
+    # seed_database(app, db)
 
 
 def seed_database(app, db):
@@ -48,9 +50,11 @@ def seed_database(app, db):
     db.session.commit()
     # add user ID of 1 to session ID so we can simulate logged-in user activity
 
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
-
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, unique=True)
     first_name = db.Column(db.String(100), nullable=False)
