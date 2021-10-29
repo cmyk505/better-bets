@@ -21,8 +21,9 @@ from flask_login import (
 import os
 import json
 from datetime import date
-from models import db, connect_db, Bet, Event
+from models import db, connect_db, Bet, Event, bcrypt, User, LoginManager, UserMixin, login_manager
 from forms import RegistrationForm, LoginForm
+<<<<<<< HEAD
 from models import User
 
 login_manager = LoginManager()
@@ -31,6 +32,16 @@ app = Flask(__name__)
 app.config["FLASK_ENV"] = os.environ.get("FLASK_ENV")
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DATABASE_URI")
 # For David's local env:  app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:heize_stan@localhost/postgres'
+=======
+from flask_login import login_user
+
+
+app = Flask(__name__)
+# David local env: not using .env
+# app.config["FLASK_ENV"] = os.environ.get("FLASK_ENV")
+# app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DATABASE_URI")
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:heize_stan@localhost/postgres'
+>>>>>>> 75eabbdd5e6db4e33083e03e7ad7ddd05fad15d3
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 app.config["SECRET_KEY"] = "my secret"
@@ -59,16 +70,38 @@ def render_home_page():
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
+<<<<<<< HEAD
         flash(f"Account created for {form.email.data}! 🙌🏼", "success")
         return redirect(url_for("render_home_page"))
     return render_template("register.html", title="Register", form=form)
+=======
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        user = User(first_name=form.first_name.data, last_name=form.last_name.data, email=form.email.data, hashed_password=hashed_password)
+        db.session.add(user)
+        db.session.commit()
+        flash(f'Account created for {form.email.data}!🙌🏼 You can now log in.', 'success')
+        return redirect(url_for('login'))
+    return render_template('register.html', title='Register', form=form)
+>>>>>>> 75eabbdd5e6db4e33083e03e7ad7ddd05fad15d3
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
+<<<<<<< HEAD
     return render_template("login.html", title="Login", form=form)
 
+=======
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user and bcrypt.check_password_hash(user.hashed_password, form.password.data):
+            login_user(user, remember=False)  # by default, the user is logged out if browser is closed
+            flash(f'Hi {user.first_name}! You are logged in.')
+            return redirect(url_for('home'))
+        else:
+            flash(f'Login Unsuccessful. Please check email and password')
+    return render_template('login.html', title='Login', form=form)
+>>>>>>> 75eabbdd5e6db4e33083e03e7ad7ddd05fad15d3
 
 @app.route("/event/<id>")
 def render_event(id):

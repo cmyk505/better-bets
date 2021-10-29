@@ -2,11 +2,16 @@ from flask import Flask, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from faker import Faker
+<<<<<<< HEAD
 from flask_login import UserMixin
+=======
+from flask_login import LoginManager, UserMixin
+>>>>>>> 75eabbdd5e6db4e33083e03e7ad7ddd05fad15d3
 
 # using bcrypt for password hashing
 db = SQLAlchemy()
 bcrypt = Bcrypt()
+login_manager = LoginManager()
 
 
 def connect_db(app):
@@ -14,12 +19,12 @@ def connect_db(app):
     db.init_app(app)
     # liao local environment:  comment out if clause
     # because you're not using .env file
-    if app.config["FLASK_ENV"] == "development":
+    # if app.config["FLASK_ENV"] == "development":
         # User.query.delete()
         # Event.query.delete()
-        db.drop_all()
-        db.create_all()
-        seed_database(app, db)
+    # db.drop_all()
+    # db.create_all()
+    # seed_database(app, db)
 
 
 def seed_database(app, db):
@@ -49,6 +54,9 @@ def seed_database(app, db):
     db.session.commit()
     # add user ID of 1 to session ID so we can simulate logged-in user activity
 
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 class User(db.Model, UserMixin):
     __tablename__ = "users"
@@ -58,6 +66,11 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(200), nullable=False, unique=True)
     hashed_password = db.Column(db.String(100), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
+    image_file = db.Column(db.String(50), nullable=False, default='defaultProfilePic.jpg')
+
+
+    def __repr__(self):
+        return f"User('{self.first_name}', '{self.last_name}', '{self.image_file}')"
 
     @classmethod
     def register(cls, password, email):
