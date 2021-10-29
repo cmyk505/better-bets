@@ -125,7 +125,7 @@ def render_event(id):
     event = Event.query.get(id)
     if event is not None:
         bet = Bet.query.filter(
-            Bet.event == event.id, Bet.user_id == session.get("user_id", 1)
+            Bet.event == event.id, Bet.user_id == current_user.id
         ).first()
     else:
         return redirect("/")
@@ -166,6 +166,8 @@ def place_bet():
         )
     )
 
+    db.session.commit()
+
     # get current user balance, then update it
     user_balance = convert_to_named_tuple(
         db.session.execute(
@@ -175,6 +177,11 @@ def place_bet():
     )[0].balance
 
     new_balance = user_balance - int(amount)
+    if new_balance < 0:
+        return json.dumps(
+            {"text": f"Your balance of {user_balance} is too low for this bet."}
+        )
+
     db.session.execute(
         "UPDATE user_balance SET balance = :new_balance WHERE user_id = :id",
         {"new_balance": new_balance, "id": current_user.id},
