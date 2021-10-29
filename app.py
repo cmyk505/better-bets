@@ -9,11 +9,23 @@ from flask import (
     session,
 )
 
+from flask_login import (
+    LoginManager,
+    UserMixin,
+    login_user,
+    current_user,
+    login_required,
+    logout_user,
+)
+
 import os
 import json
 from datetime import date
 from models import db, connect_db, Bet, Event
 from forms import RegistrationForm, LoginForm
+from models import User
+
+login_manager = LoginManager()
 
 app = Flask(__name__)
 app.config["FLASK_ENV"] = os.environ.get("FLASK_ENV")
@@ -23,8 +35,15 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 app.config["SECRET_KEY"] = "my secret"
 app.debug = True
+login_manager.init_app(app)
 
 connect_db(app)
+
+
+@login_manager.user_loader
+def load_user(userid):
+    user_id = int(userid)
+    return User.query.get(user_id)
 
 
 @app.route("/")

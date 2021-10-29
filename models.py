@@ -2,6 +2,7 @@ from flask import Flask, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from faker import Faker
+from flask_login import UserMixin
 
 # using bcrypt for password hashing
 db = SQLAlchemy()
@@ -49,15 +50,45 @@ def seed_database(app, db):
     # add user ID of 1 to session ID so we can simulate logged-in user activity
 
 
-
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, unique=True)
-    first_name = db.Column(db.String(100), nullable=False)
-    last_name = db.Column(db.String(100), nullable=False)
+    first_name = db.Column(db.String(100))
+    last_name = db.Column(db.String(100))
     email = db.Column(db.String(200), nullable=False, unique=True)
     hashed_password = db.Column(db.String(100), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
+
+    @classmethod
+    def register(cls, password, email):
+        hashed_password = bcrypt.generate_password_hash(password)
+        hashed_password_utf8 = hashed_password.decode("utf8")
+        return cls(hashed_password=hashed_password_utf8, email=email)
+
+    @classmethod
+    def authenticate(cls, email, password):
+        user = User.query.filter_by(email=email).first()
+        if user and bcrypt.check_password_hash(user.password, password):
+            return user
+        return False
+
+    @classmethod
+    def change_password(cls, id, current_password, new_password):
+        """Change password for an existing user
+        Return false if current password passed into function is incorrect. Otherwise
+        return the user
+        """
+
+        user = cls.query.filter_by(id=id).first()
+        if user:
+            correct_password = bcrypt.check_password_hash(
+                user.password, current_password
+            )
+            if correct_password:
+                return user
+
+        return False
+
 
 class UserFollow(db.Model):
     __tablename__ = "user_follow"
@@ -68,9 +99,6 @@ class UserFollow(db.Model):
     followed_id = db.Column(
         db.Integer, db.ForeignKey("users.id"), nullable=False, primary_key=True
     )
-
-
-
 
 
 class Event(db.Model):
