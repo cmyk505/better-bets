@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from faker import Faker
 from flask_login import LoginManager, UserMixin
+from sqlalchemy.orm import relationship
 
 # using bcrypt for password hashing
 db = SQLAlchemy()
@@ -127,6 +128,8 @@ class Event(db.Model):
     winner = db.Column(db.String(50), default="Undecided")
     date = db.Column(db.Date, nullable=False)
 
+    bets = db.relationship("Bet", backref="event_ref")
+
     # write methods
     # 1 call api, use sqlalchemy to get event data, write to db
     # 2 determine the winner
@@ -146,6 +149,7 @@ class Bet(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     event = db.Column(db.Integer, db.ForeignKey("event.id"), nullable=False)
+    event_date = db.Column(db.Date, nullable=False)
     selection = db.Column(db.String(100), nullable=False)
     result = db.String(db.String(1))
     final_margin = db.Column(db.Integer, default=0)

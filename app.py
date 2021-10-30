@@ -22,7 +22,7 @@ from flask_login import (
 
 import os
 import json
-from datetime import date
+from datetime import date, datetime, timedelta
 from models import (
     db,
     connect_db,
@@ -65,7 +65,29 @@ def render_home_page():
 
     events = Event.query.filter(Event.date >= date.today()).limit(10)
 
-    return render_template("home.html", events=events)
+    # if logged in, show user their 10 most recent bets
+    last_30_days = datetime.today() - timedelta(days=30)
+    bets = (
+        None
+        if current_user.is_authenticated is False
+        else Bet.query.filter(
+            Bet.event_date >= last_30_days, Bet.user_id == current_user.id
+        ).limit(10)
+    )
+    if bets:
+        bets_events = []
+        for bet in bets:
+            bets_events.append(
+                {
+                    "event": (Event.query.filter(Event.id == bet.event)).first(),
+                    "bet": bet,
+                }
+            )
+
+    else:
+        bets_events = None
+
+    return render_template("home.html", events=events, bets_events=bets_events)
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -120,20 +142,44 @@ def login():
     return render_template("login.html", title="Login", form=form)
 
 
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    flash("You've logged out")
+    return redirect(url_for("render_home_page"))
+
+
 @app.route("/event/<id>")
 def render_event(id):
     event = Event.query.get(id)
-    if event is not None:
+
+    # redirect to home if event does not exist
+    if event is None:
+        return redirect("/")
+
+    if event is not None and current_user.is_authenticated:
         bet = Bet.query.filter(
             Bet.event == event.id, Bet.user_id == current_user.id
         ).first()
-    else:
-        return redirect("/")
-    # redirect to home if event does not exist
     bet_on = False if bet == None else True
     result = event.winner
+
+    # get 5 most recent bets on event
+
+    if len(event.bets) > 0:
+        bets = event.bets[-5:]
+    else:
+        bets = None
+    # bets = (
+    #     Bet.query.filter(Bet.date >= date.today())
+    #     .order_by(Bet.id.desc())
+    #     .first()
+    #     .limit(5)
+    # )
+
     return render_template(
-        "event.html", event=event, bet_on=bet_on, bet=bet, result=result
+        "event.html", event=event, bet_on=bet_on, bet=bet, bets=bets, result=result
     )
 
 
@@ -160,13 +206,12 @@ def place_bet():
     db.session.add(
         Bet(
             event=event.id,
+            event_date=event.date,
             selection=selection,
             amount=int(amount),
             user_id=current_user.id,
         )
     )
-
-    db.session.commit()
 
     # get current user balance, then update it
     user_balance = convert_to_named_tuple(
@@ -177,28 +222,32 @@ def place_bet():
     )[0].balance
 
     new_balance = user_balance - int(amount)
+    # prevent any bet that brings user balance below 0
     if new_balance < 0:
         return json.dumps(
             {"text": f"Your balance of {user_balance} is too low for this bet."}
         )
-
-    db.session.execute(
-        "UPDATE user_balance SET balance = :new_balance WHERE user_id = :id",
-        {"new_balance": new_balance, "id": current_user.id},
-    )
-    return json.dumps({"text": f"You bet on {selection}. New balance is {new_balance}"})
+    else:
+        db.session.execute(
+            "UPDATE user_balance SET balance = :new_balance WHERE user_id = :id",
+            {"new_balance": new_balance, "id": current_user.id},
+        )
+        db.session.commit()
+        return json.dumps(
+            {"text": f"You bet on {selection}. New balance is {new_balance}"}
+        )
 
 
 @app.route("/api/bet", methods=["PATCH"])
 def update_bet():
-    """Receives JSON posted from JS event listener with 1) event ID user is updating 2) user's update and then updates database"""
+    """Receives JSON posted from scheduled task with 1) event ID 2) resolution to bet and then updates database"""
     json_data = json.loads(request.data)
     event = Event.query.get(json_data["eventId"])
 
 
-@app.route("/api/bet", methods=["DELETE"])
-def delete_bet():
-    """Receives JSON posted from JS event listener with event ID user is deleting and updates database"""
-    json_data = json.loads(request.data)
-    print("pause")
-    return json.dumps({"text": f"You bet on {json_data['selection']}"})
+# @app.route("/api/bet", methods=["DELETE"])
+# def delete_bet():
+#     """Receives JSON posted from JS event listener with event ID user is deleting and updates database"""
+#     json_data = json.loads(request.data)
+#     print("pause")
+#     return json.dumps({"text": f"You bet on {json_data['selection']}"})
