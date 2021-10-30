@@ -14,12 +14,12 @@ def connect_db(app):
     db.init_app(app)
     # liao local environment:  comment out if clause
     # because you're not using .env file
-    if app.config["FLASK_ENV"] == "development":
+    #if app.config["FLASK_ENV"] == "development":
         # User.query.delete()
         # Event.query.delete()
-        db.drop_all()
-        db.create_all()
-        seed_database(app, db)
+    db.drop_all()
+    db.create_all()
+    seed_database(app, db)
 
 
 def seed_database(app, db):
