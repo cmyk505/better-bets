@@ -171,12 +171,6 @@ def render_event(id):
         bets = event.bets[-5:]
     else:
         bets = None
-    # bets = (
-    #     Bet.query.filter(Bet.date >= date.today())
-    #     .order_by(Bet.id.desc())
-    #     .first()
-    #     .limit(5)
-    # )
 
     return render_template(
         "event.html", event=event, bet_on=bet_on, bet=bet, bets=bets, result=result
