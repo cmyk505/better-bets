@@ -2,11 +2,13 @@ from flask import Flask, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from faker import Faker
-from flask_login import UserMixin
+from flask_login import LoginManager, UserMixin
+from sqlalchemy.orm import relationship
 
 # using bcrypt for password hashing
 db = SQLAlchemy()
 bcrypt = Bcrypt()
+login_manager = LoginManager()
 
 
 def connect_db(app):
@@ -14,9 +16,15 @@ def connect_db(app):
     db.init_app(app)
     # liao local environment:  comment out if clause
     # because you're not using .env file
+<<<<<<< HEAD
     #if app.config["FLASK_ENV"] == "development":
         # User.query.delete()
         # Event.query.delete()
+=======
+    # if app.config["FLASK_ENV"] == "development":
+    #     User.query.delete()
+    #     Event.query.delete()
+>>>>>>> 481bcc44e14fd697f8e3b1ff02fb1feffde7c9ba
     db.drop_all()
     db.create_all()
     seed_database(app, db)
@@ -50,6 +58,11 @@ def seed_database(app, db):
     # add user ID of 1 to session ID so we can simulate logged-in user activity
 
 
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+
 class User(db.Model, UserMixin):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, unique=True)
@@ -58,6 +71,12 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(200), nullable=False, unique=True)
     hashed_password = db.Column(db.String(100), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
+    image_file = db.Column(
+        db.String(50), nullable=False, default="defaultProfilePic.jpg"
+    )
+
+    def __repr__(self):
+        return f"User('{self.first_name}', '{self.last_name}', '{self.image_file}')"
 
     @classmethod
     def register(cls, password, email):
@@ -115,6 +134,8 @@ class Event(db.Model):
     winner = db.Column(db.String(50), default="Undecided")
     date = db.Column(db.Date, nullable=False)
 
+    bets = db.relationship("Bet", backref="event_ref")
+
     # write methods
     # 1 call api, use sqlalchemy to get event data, write to db
     # 2 determine the winner
@@ -134,6 +155,7 @@ class Bet(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     event = db.Column(db.Integer, db.ForeignKey("event.id"), nullable=False)
+    event_date = db.Column(db.Date, nullable=False)
     selection = db.Column(db.String(100), nullable=False)
     result = db.String(db.String(1))
     final_margin = db.Column(db.Integer, default=0)

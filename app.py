@@ -9,6 +9,8 @@ from flask import (
     session,
 )
 
+from helpers import convert_to_named_tuple
+
 from flask_login import (
     LoginManager,
     UserMixin,
@@ -20,8 +22,19 @@ from flask_login import (
 
 import os
 import json
-from datetime import date
-from models import db, connect_db, Bet, Event
+from datetime import date, datetime, timedelta
+from models import (
+    db,
+    connect_db,
+    Bet,
+    Event,
+    bcrypt,
+    User,
+    UserBalance,
+    LoginManager,
+    UserMixin,
+    login_manager,
+)
 from forms import RegistrationForm, LoginForm
 from models import User
 
@@ -52,38 +65,117 @@ def render_home_page():
 
     events = Event.query.filter(Event.date >= date.today()).limit(10)
 
-    return render_template("home.html", events=events)
+    # if logged in, show user their 10 most recent bets
+    last_30_days = datetime.today() - timedelta(days=30)
+    bets = (
+        None
+        if current_user.is_authenticated is False
+        else Bet.query.filter(
+            Bet.event_date >= last_30_days, Bet.user_id == current_user.id
+        ).limit(10)
+    )
+    if bets:
+        bets_events = []
+        for bet in bets:
+            bets_events.append(
+                {
+                    "event": (Event.query.filter(Event.id == bet.event)).first(),
+                    "bet": bet,
+                }
+            )
+
+    else:
+        bets_events = None
+
+    return render_template("home.html", events=events, bets_events=bets_events)
 
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        flash(f"Account created for {form.email.data}! 🙌🏼", "success")
-        return redirect(url_for("render_home_page"))
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode(
+            "utf-8"
+        )
+        user = User(
+            first_name=form.first_name.data,
+            last_name=form.last_name.data,
+            email=form.email.data,
+            hashed_password=hashed_password,
+        )
+        db.session.add(user)
+        db.session.commit()
+        flash(
+            f"Account created for {form.email.data}!🙌🏼 You can now log in.", "success"
+        )
+
+        # create UserBalance record in DB
+        res = db.session.execute(
+            "SELECT * from users WHERE id = (SELECT max(id) FROM users)"
+        )
+        new_id = None
+        for r in res:
+            user_id = r[0]
+        user_balance = UserBalance(user_id=user_id)
+
+        db.session.add(user_balance)
+        db.session.commit()
+        return redirect(url_for("login"))
     return render_template("register.html", title="Register", form=form)
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user and bcrypt.check_password_hash(
+            user.hashed_password, form.password.data
+        ):
+            login_user(
+                user, remember=False
+            )  # by default, the user is logged out if browser is closed
+            flash(f"Hi {user.first_name}! You are logged in.")
+            return redirect(url_for("render_home_page"))
+        else:
+            flash(f"Login Unsuccessful. Please check email and password")
     return render_template("login.html", title="Login", form=form)
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    flash("You've logged out")
+    return redirect(url_for("render_home_page"))
 
 
 @app.route("/event/<id>")
 def render_event(id):
     event = Event.query.get(id)
-    if event is not None:
+
+    # redirect to home if event does not exist
+    if event is None:
+        return redirect("/")
+
+    if event is not None and current_user.is_authenticated:
         bet = Bet.query.filter(
-            Bet.event == event.id, Bet.user_id == session.get("user_id", 1)
+            Bet.event == event.id, Bet.user_id == current_user.id
         ).first()
     else:
-        return redirect("/")
-    # redirect to home if event does not exist
+        bet = None
     bet_on = False if bet == None else True
     result = event.winner
+
+    # get 5 most recent bets on event
+
+    if len(event.bets) > 0:
+        bets = event.bets[-5:]
+    else:
+        bets = None
+
     return render_template(
-        "event.html", event=event, bet_on=bet_on, bet=bet, result=result
+        "event.html", event=event, bet_on=bet_on, bet=bet, bets=bets, result=result
     )
 
 
@@ -96,6 +188,7 @@ def render_event(id):
 
 
 @app.route("/api/bet", methods=["POST"])
+@login_required
 def place_bet():
     """Receives JSON posted from JS event listener with 1) event ID user is betting on 2) user's bet. We can retrieve current user ID from Flask session to update database"""
     # TODO these routes should be protected/have validation
@@ -109,22 +202,46 @@ def place_bet():
     db.session.add(
         Bet(
             event=event.id,
+            event_date=event.date,
             selection=selection,
             amount=int(amount),
-            user_id=session.get("logged_in_user", 1),
+            user_id=current_user.id,
         )
     )
-    db.session.commit()
-    return json.dumps({"text": f"You bet on {selection}"})
+
+    # get current user balance, then update it
+    user_balance = convert_to_named_tuple(
+        db.session.execute(
+            "SELECT balance FROM user_balance WHERE user_id = :user_id",
+            {"user_id": current_user.id},
+        )
+    )[0].balance
+
+    new_balance = user_balance - int(amount)
+    # prevent any bet that brings user balance below 0
+    if new_balance < 0:
+        return json.dumps(
+            {"text": f"Your balance of {user_balance} is too low for this bet."}
+        )
+    else:
+        db.session.execute(
+            "UPDATE user_balance SET balance = :new_balance WHERE user_id = :id",
+            {"new_balance": new_balance, "id": current_user.id},
+        )
+        db.session.commit()
+        return json.dumps(
+            {"text": f"You bet on {selection}. New balance is {new_balance}"}
+        )
 
 
 @app.route("/api/bet", methods=["PATCH"])
 def update_bet():
-    """Receives JSON posted from JS event listener with 1) event ID user is updating 2) user's update and then updates database"""
+    """Receives JSON posted from scheduled task with 1) event ID 2) resolution to bet and then updates database"""
     json_data = json.loads(request.data)
     event = Event.query.get(json_data["eventId"])
 
 
+<<<<<<< HEAD
 @app.route("/api/bet", methods=["DELETE"])
 def delete_bet():
     """Receives JSON posted from JS event listener with event ID user is deleting and updates database"""
@@ -136,3 +253,11 @@ def delete_bet():
 def test():
     return "Hello World"
 
+=======
+# @app.route("/api/bet", methods=["DELETE"])
+# def delete_bet():
+#     """Receives JSON posted from JS event listener with event ID user is deleting and updates database"""
+#     json_data = json.loads(request.data)
+#     print("pause")
+#     return json.dumps({"text": f"You bet on {json_data['selection']}"})
+>>>>>>> 481bcc44e14fd697f8e3b1ff02fb1feffde7c9ba

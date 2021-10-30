@@ -7,9 +7,25 @@
 
 <div class="top-container">
     <h1>home</h1>
+    {% if current_user.is_authenticated == False %}
     <div>
         <a href="{{ url_for('login') }}">Sign In</a>
         <a href="{{ url_for('register') }}">Register</a>
+    </div>
+    {% else %}
+    <a href="{{ url_for('logout') }}">Log out</a>
+    {% endif %}
+
+    <div class="bet-container">
+        {% if bets_events %}
+        <h1>Your recent bets:</h1>
+        <ul id="bet-ul">
+            {% for bet in bets_events %}
+            <li><a href="/event/{{bet['event'].id}}">${{bet['bet'].amount}} on {{bet['bet'].selection}}
+                    ({{bet['event'].home_team}} vs {{bet['event'].away_team}})</a></li>
+            {% endfor %}
+        </ul>
+        {% endif %}
     </div>
 
     <div class="event-container">
