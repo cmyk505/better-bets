@@ -241,23 +241,9 @@ def update_bet():
     event = Event.query.get(json_data["eventId"])
 
 
-<<<<<<< HEAD
-@app.route("/api/bet", methods=["DELETE"])
-def delete_bet():
-    """Receives JSON posted from JS event listener with event ID user is deleting and updates database"""
-    json_data = json.loads(request.data)
-    print("pause")
-    return json.dumps({"text": f"You bet on {json_data['selection']}"})
-
-@app.route("/test")
-def test():
-    return "Hello World"
-
-=======
 # @app.route("/api/bet", methods=["DELETE"])
 # def delete_bet():
 #     """Receives JSON posted from JS event listener with event ID user is deleting and updates database"""
 #     json_data = json.loads(request.data)
 #     print("pause")
 #     return json.dumps({"text": f"You bet on {json_data['selection']}"})
->>>>>>> 481bcc44e14fd697f8e3b1ff02fb1feffde7c9ba
