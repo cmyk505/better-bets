@@ -162,6 +162,8 @@ def render_event(id):
         bet = Bet.query.filter(
             Bet.event == event.id, Bet.user_id == current_user.id
         ).first()
+    else:
+        bet = None
     bet_on = False if bet == None else True
     result = event.winner
 
