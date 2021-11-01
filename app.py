@@ -43,7 +43,8 @@ login_manager = LoginManager()
 app = Flask(__name__)
 app.config["FLASK_ENV"] = os.environ.get("FLASK_ENV")
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DATABASE_URI")
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:040839@localhost/bets'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:040839@localhost/postgres'
+#For codeAnywhere only: app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:040839@localhost/bets'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 app.config["SECRET_KEY"] = "my secret"
@@ -233,6 +234,9 @@ def place_bet():
             {"text": f"You bet on {selection}. New balance is {new_balance}"}
         )
 
+@app.route("/test")
+def test():
+    return "Hello world!!! This is a test"
 
 @app.route("/api/bet", methods=["PATCH"])
 def update_bet():
