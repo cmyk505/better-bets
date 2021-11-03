@@ -47,6 +47,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:heize_stan@localh
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 app.config["SECRET_KEY"] = "my secret"
+app.config['API_KEY'] = '40130162'
 app.debug = True
 login_manager.init_app(app)
 
