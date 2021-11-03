@@ -3,3 +3,7 @@
 __pycache__/
 .DS_Store
 env/
+node_modules/
+cypress/
+cypress.json
+cypress.d.ts
