@@ -52,7 +52,6 @@ login_manager.init_app(app)
 
 connect_db(app)
 
-
 @login_manager.user_loader
 def load_user(userid):
     user_id = int(userid)
