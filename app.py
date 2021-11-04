@@ -41,24 +41,19 @@ from models import User
 login_manager = LoginManager()
 
 app = Flask(__name__)
-<<<<<<< HEAD
 app.config["FLASK_ENV"] = os.environ.get("FLASK_ENV")
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DATABASE_URI")
 app.config["API_KEY"] = os.environ.get("API_KEY")
 # For David's local env:  app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:heize_stan@localhost/postgres'
-=======
-# app.config["FLASK_ENV"] = os.environ.get("FLASK_ENV")
-# app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DATABASE_URI")
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:heize_stan@localhost/postgres'
->>>>>>> e8239caea2f4f3d2321f0f72c7ea4673b4616d92
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 app.config["SECRET_KEY"] = "my secret"
-app.config['API_KEY'] = '40130162'
+app.config["API_KEY"] = "40130162"
 app.debug = True
 login_manager.init_app(app)
 
 connect_db(app)
+
 
 @login_manager.user_loader
 def load_user(userid):
