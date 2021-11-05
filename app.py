@@ -22,7 +22,6 @@ from flask_login import (
 
 import os
 import json
-<<<<<<< HEAD
 from datetime import date, datetime, timedelta
 from models import (
     db,
@@ -38,14 +37,10 @@ from models import (
 )
 from forms import RegistrationForm, LoginForm
 from models import User
-
-login_manager = LoginManager()
-=======
-from datetime import date
-from models import db, connect_db, Bet, Event
 from flask_socketio import SocketIO, emit, disconnect
 from variables import clients
->>>>>>> scheduler-branch
+
+login_manager = LoginManager()
 
 app = Flask(__name__)
 app.config["FLASK_ENV"] = os.environ.get("FLASK_ENV")
@@ -55,13 +50,10 @@ app.config["API_KEY"] = os.environ.get("API_KEY")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 app.config["SECRET_KEY"] = "my secret"
-<<<<<<< HEAD
 app.config["API_KEY"] = "40130162"
 app.debug = True
 login_manager.init_app(app)
-=======
 socket_ = SocketIO(app)
->>>>>>> scheduler-branch
 
 connect_db(app)
 socket_.run(app, debug=True)
@@ -256,14 +248,6 @@ def update_bet():
     event = Event.query.get(json_data["eventId"])
 
 
-<<<<<<< HEAD
-# @app.route("/api/bet", methods=["DELETE"])
-# def delete_bet():
-#     """Receives JSON posted from JS event listener with event ID user is deleting and updates database"""
-#     json_data = json.loads(request.data)
-#     print("pause")
-#     return json.dumps({"text": f"You bet on {json_data['selection']}"})
-=======
 @app.route("/api/bet", methods=["DELETE"])
 def delete_bet():
     """Receives JSON posted from JS event listener with event ID user is deleting and updates database"""
@@ -315,4 +299,3 @@ def handle_disconnect():
 # @socket_.on("message")
 # def send_message():
 #     emit("my response", {"data": "sending a message here"})
->>>>>>> scheduler-branch

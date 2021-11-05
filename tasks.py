@@ -2,6 +2,7 @@ from flask import Flask, request, session, render_template
 from app import app, socket_, db
 from faker import Faker
 from models import User, Event
+from helpers import convert_to_named_tuple
 
 
 def run_tasks():
@@ -22,7 +23,12 @@ def run_tasks():
 
 
 # Need to find all users with unresolved bets
-# users = db.session.execute('SELECT user_id FROM bet JOIN event ON event.id = bet.event WHERE event.resolved= :val', {'val': 'f'})
+users = convert_to_named_tuple(
+    db.session.execute(
+        "SELECT user_id FROM bet JOIN event ON event.id = bet.event WHERE event.resolved= :val",
+        {"val": "f"},
+    )
+)
 
 # Need to go through all unresolved bets and make API call checking for result (might need to wait 2 mins between each API call, so update could take a while)
 
