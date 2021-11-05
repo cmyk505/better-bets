@@ -22,6 +22,7 @@ from flask_login import (
 
 import os
 import json
+<<<<<<< HEAD
 from datetime import date, datetime, timedelta
 from models import (
     db,
@@ -39,6 +40,12 @@ from forms import RegistrationForm, LoginForm
 from models import User
 
 login_manager = LoginManager()
+=======
+from datetime import date
+from models import db, connect_db, Bet, Event
+from flask_socketio import SocketIO, emit, disconnect
+from variables import clients
+>>>>>>> scheduler-branch
 
 app = Flask(__name__)
 app.config["FLASK_ENV"] = os.environ.get("FLASK_ENV")
@@ -48,11 +55,17 @@ app.config["API_KEY"] = os.environ.get("API_KEY")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 app.config["SECRET_KEY"] = "my secret"
+<<<<<<< HEAD
 app.config["API_KEY"] = "40130162"
 app.debug = True
 login_manager.init_app(app)
+=======
+socket_ = SocketIO(app)
+>>>>>>> scheduler-branch
 
 connect_db(app)
+socket_.run(app, debug=True)
+from scheduler import start, stop
 
 
 @login_manager.user_loader
@@ -243,9 +256,63 @@ def update_bet():
     event = Event.query.get(json_data["eventId"])
 
 
+<<<<<<< HEAD
 # @app.route("/api/bet", methods=["DELETE"])
 # def delete_bet():
 #     """Receives JSON posted from JS event listener with event ID user is deleting and updates database"""
 #     json_data = json.loads(request.data)
 #     print("pause")
 #     return json.dumps({"text": f"You bet on {json_data['selection']}"})
+=======
+@app.route("/api/bet", methods=["DELETE"])
+def delete_bet():
+    """Receives JSON posted from JS event listener with event ID user is deleting and updates database"""
+    json_data = json.loads(request.data)
+    print("pause")
+    return json.dumps({"text": f"You bet on {json_data['selection']}"})
+
+
+# Route for use testing scheduling functionality
+
+
+@app.route("/test_scheduler", methods=["GET"])
+def render_schedule():
+    """Renders template with button that calls JS to test scheduling functionality"""
+    return render_template("test_scheduler.html")
+
+
+@app.route("/start", methods=["POST"])
+def schedule_start():
+    """Runs scheduler"""
+    start()
+    return json.dumps({"result": "started"})
+
+
+@app.route("/stop", methods=["POST"])
+def schedule_stop():
+    """Stops scheduler"""
+    stop()
+    return json.dumps({"result": "stopped"})
+
+
+@socket_.on("my event")
+def get_initial_message(data):
+    print(data)
+
+
+@socket_.on("connect")
+def handle_connect():
+    print("Client connected")
+    clients.append(request.sid)
+
+
+@socket_.on("disconnect")
+def handle_disconnect():
+    print("Client disconnected")
+    clients.remove(request.sid)
+
+
+# @socket_.on("message")
+# def send_message():
+#     emit("my response", {"data": "sending a message here"})
+>>>>>>> scheduler-branch
