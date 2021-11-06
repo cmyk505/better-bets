@@ -20,6 +20,15 @@ users = convert_to_named_tuple(
 
 # Need to go through all unresolved bets and make API call checking for result (might need to wait 2 mins between each API call, so update could take a while)
 
+# Below query gets all unresolved events with bets 
+convert_to_named_tuple(db.session.execute(
+    "SELECT e.sportsdb_id, e.id FROM event e JOIN bet b ON b.event = e.id WHERE e.resolved = 'f'"
+))
+
+# Then need to make API call
+
+# APIManager.get_event_result() 
+
 # Need to update database for all events where API call found a result
 # Need to update all unresolved bets linked to events we just resolved
 # balance_adjustment = {}
