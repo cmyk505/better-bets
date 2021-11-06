@@ -57,6 +57,9 @@ login_manager.init_app(app)
 connect_db(app)
 from scheduler import start, stop
 
+# start scheduled tasks
+start()
+
 
 @login_manager.user_loader
 def load_user(userid):

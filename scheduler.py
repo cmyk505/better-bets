@@ -1,7 +1,6 @@
 from flask import Flask, request, session, render_template
 from dotenv import load_dotenv
-import datetime
-from datetime import date
+from datetime import datetime
 from apscheduler.schedulers.blocking import BlockingScheduler
 import logging
 from app import app
@@ -15,21 +14,15 @@ logging.getLogger("apscheduler").setLevel(logging.DEBUG)
 sched = BlockingScheduler()
 
 
-# @sched.scheduled_job("interval", minutes=1)
-# def timed_job():
-#     with app.app_context():
-#         run_tasks()
-#     return "tried to do something"
-
-
 def start():
     """"""
 
-    @sched.scheduled_job("interval", seconds=3)
+    @sched.scheduled_job("interval", minutes=1)
     def timed_job():
         with app.app_context():
             run_tasks()
-        return "tried to do something"
+        now = datetime.now()
+        print(f'Running scheduled task at {now.strftime("%H:%M:%S")}')
 
     sched.start()
 

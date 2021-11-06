@@ -3,52 +3,97 @@ from app import app, db
 from faker import Faker
 from models import User, Event
 from helpers import convert_to_named_tuple
+import requests
+
+
+def get_event_result(id):
+    required_fields = [
+        "idEvent",
+        "strEvent",
+        "strHomeTeam",
+        "strAwayTeam",
+        "intHomeScore",
+        "intAwayScore",
+        "strTimestamp",
+        "strStatus",
+        "dateEvent",
+    ]
+
+    api_url = "https://www.thesportsdb.com/api/v1/json/1/lookupevent.php?id=" + str(id)
+    data = requests.get(api_url).json()["events"][0]
+
+    if data["strStatus"] == "FT" or data["strStatus"] == "AOT":
+        event_info = {x: data[x] for x in required_fields}
+
+        if event_info["intHomeScore"] > event_info["intAwayScore"]:
+            event_info.update({"winner": event_info["strHomeTeam"]})
+        else:
+            event_info.update({"winner": event_info["strAwayTeam"]})
+        event_info.update({"resolved": "true"})
+
+    return event_info
 
 
 def run_tasks():
     """"""
-    print("Not doing much yet")
-
-
-# Need to find all users with unresolved bets
-users = convert_to_named_tuple(
-    db.session.execute(
-        "SELECT user_id FROM bet JOIN event ON event.id = bet.event WHERE event.resolved= :val",
-        {"val": "f"},
+    # Below query gets all unresolved events with bets
+    unresolved_events = convert_to_named_tuple(
+        db.session.execute(
+            "SELECT e.sportsdb_id, e.id FROM event e JOIN bet b ON b.event = e.id WHERE e.resolved = 'f'"
+        )
     )
-)
+    if len(unresolved_events) == 0:
+        return
+    # Then need to make API call
+    update_list = []
+    for e in unresolved_events:
+        print("hi")
+        res = get_event_result(e.sportsdb_id)
+        update_list.append(res)
 
-# Need to go through all unresolved bets and make API call checking for result (might need to wait 2 mins between each API call, so update could take a while)
+    # Need to update database for all events where API call found a result
+    # Need to update all unresolved bets linked to events we just resolved
 
-# Below query gets all unresolved events with bets 
-convert_to_named_tuple(db.session.execute(
-    "SELECT e.sportsdb_id, e.id FROM event e JOIN bet b ON b.event = e.id WHERE e.resolved = 'f'"
-))
+    for e in update_list:
+        db.session.execute(
+            "UPDATE event SET winner = :winner, resolved=:resolved WHERE sportsdb_id = :sportsdb_id",
+            {"winner": e["winner"], "resolved": "t", "sportsdb_id": e["idEvent"]},
+        )
+        db.session.commit()
 
-# Then need to make API call
+        balance_adjustment = {}
+        # dictionary to hold user ID and balance adjustment for that user based on newly resolved bet
 
-# APIManager.get_event_result() 
+        event = convert_to_named_tuple(
+            db.session.execute(
+                "SELECT id FROM event WHERE sportsdb_id = :id", {"id": e["idEvent"]}
+            )
+        )
 
-# Need to update database for all events where API call found a result
-# Need to update all unresolved bets linked to events we just resolved
-# balance_adjustment = {}
-# dictionary to hold user ID and balance adjustment for that user based on newly resolved bets
-# for (id, winner) in api_results:
-# db.session.execute('UPDATE event SET winner = :winner, resolved=:resolved WHERE id = :id', {'winner': winner, 'resolved': 't', 'id': id})
-# bets = db.session.execute('SELECT id, amount, selection FROM bet WHERE event = :id', {'id': id})
-# for b in bets:
-# b_dict = dict(b.items()) # convert to dict keyed by column names
-# id = b_dict['id']
-# amount = b_dict['amount']
-# selection = b_dict['selection']
-# final_margin = amount if winner==selection else -amount
-# if balance_adjustment.get(b_dict['user_id']) is not None:
-#   balance_adjustment[b_dict['user_id']] = balance_adjustment[b_dict['user_id']] + finalMargin
-# else:
-#   balance_adjustment[b_dict['user_id']] = finalMargin
-# db.session.execute('UPDATE bet SET final_margin=:final_margin WHERE event IN (SELECT id FROM event WHERE id=:id', {'final_margin': final_margin, 'id': id})
+        bets = db.session.execute(
+            "SELECT id, amount, selection, user_id FROM bet WHERE event = :id",
+            {"id": event[0].id},
+        )
+        for b in bets:
+            final_margin = (
+                b.amount if e["winner"].lower() == b.selection.lower() else -b.amount
+            )
+            if balance_adjustment.get(b.user_id) is not None:
+                balance_adjustment[b.user_id] = (
+                    balance_adjustment[b.user_id] + final_margin
+                )
+            else:
+                balance_adjustment[b.user_id] = final_margin
+            db.session.execute(
+                "UPDATE bet SET final_margin=:final_margin WHERE event IN (SELECT id FROM event WHERE id=:id)",
+                {"final_margin": final_margin, "id": event[0].id},
+            )
+            db.session.commit()
 
-
-# For all newly resolved bets, need to update user balance for all linked users
-# for (k, v) in balance_adjustment.items():
-# db.session.execute(UPDATE user_balance SET balance = (balance + :adjustment) WHERE user_id = :user_id', {'adjustment': v, 'user_id': v})
+        # For all newly resolved bets, need to update user balance for all linked users
+        for (k, v) in balance_adjustment.items():
+            db.session.execute(
+                "UPDATE user_balance SET balance = (balance + :adjustment) WHERE user_id = :user_id",
+                {"adjustment": v, "user_id": k},
+            )
+            db.session.commit()
