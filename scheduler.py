@@ -23,7 +23,8 @@ def start(app):
         now = datetime.now()
         print(f'Running scheduled task at {now.strftime("%H:%M:%S")}')
 
-    sched.start()
+
+sched.start()
 
 
 def stop():
