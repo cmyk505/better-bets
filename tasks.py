@@ -1,5 +1,5 @@
 from flask import Flask, request, session, render_template
-from app import app, db
+from app import db
 from faker import Faker
 from models import User, Event
 from helpers import convert_to_named_tuple
@@ -69,15 +69,21 @@ def run_tasks():
                 "SELECT id FROM event WHERE sportsdb_id = :id", {"id": e["idEvent"]}
             )
         )
+        # event to get event ID in database as opposed to eventsdb_id (from API)
 
         bets = db.session.execute(
             "SELECT id, amount, selection, user_id FROM bet WHERE event = :id",
             {"id": event[0].id},
         )
+
+        # above gets all bets from DB for given unresolved event in loop. Then we'll loop through all those bets for the given event
+
         for b in bets:
             final_margin = (
                 b.amount if e["winner"].lower() == b.selection.lower() else -b.amount
             )
+            # final margin is positive or negative amoount depending on if user won bet
+
             if balance_adjustment.get(b.user_id) is not None:
                 balance_adjustment[b.user_id] = (
                     balance_adjustment[b.user_id] + final_margin
@@ -89,6 +95,7 @@ def run_tasks():
                 {"final_margin": final_margin, "id": event[0].id},
             )
             db.session.commit()
+            # update bet record in database
 
         # For all newly resolved bets, need to update user balance for all linked users
         for (k, v) in balance_adjustment.items():

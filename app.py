@@ -58,7 +58,7 @@ connect_db(app)
 from scheduler import start, stop
 
 # start scheduled tasks
-start()
+start(app)
 
 
 @login_manager.user_loader
