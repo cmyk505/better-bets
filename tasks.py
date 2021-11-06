@@ -1,5 +1,5 @@
 from flask import Flask, request, session, render_template
-from app import app, db
+
 from faker import Faker
 from models import User, Event
 from helpers import convert_to_named_tuple
@@ -34,7 +34,7 @@ def get_event_result(id):
     return event_info
 
 
-def run_tasks():
+def run_tasks(db):
     """"""
     # Below query gets all unresolved events with bets
     unresolved_events = convert_to_named_tuple(

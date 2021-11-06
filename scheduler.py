@@ -3,7 +3,6 @@ from dotenv import load_dotenv
 from datetime import datetime
 from apscheduler.schedulers.blocking import BlockingScheduler
 import logging
-from app import app
 
 from tasks import run_tasks
 
@@ -14,7 +13,7 @@ logging.getLogger("apscheduler").setLevel(logging.DEBUG)
 sched = BlockingScheduler()
 
 
-def start():
+def start(app):
     """"""
 
     @sched.scheduled_job("interval", minutes=1)
@@ -24,7 +23,8 @@ def start():
         now = datetime.now()
         print(f'Running scheduled task at {now.strftime("%H:%M:%S")}')
 
-    sched.start()
+
+sched.start()
 
 
 def stop():
