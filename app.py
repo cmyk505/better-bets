@@ -81,14 +81,9 @@ def timed_job():
 
 connect_db(app)
 
-<<<<<<< HEAD
-# start scheduled tasks
-start(app)
-=======
 
 def stop():
     sched.shutdown()
->>>>>>> fixing-scheduler
 
 
 @login_manager.user_loader
