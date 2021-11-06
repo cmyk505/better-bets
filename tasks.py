@@ -1,5 +1,5 @@
 from flask import Flask, request, session, render_template
-from app import app, socket_, db
+from app import app, db
 from faker import Faker
 from models import User, Event
 from helpers import convert_to_named_tuple
@@ -7,19 +7,7 @@ from helpers import convert_to_named_tuple
 
 def run_tasks():
     """"""
-    print("Adding a new user to the database every minute")
-    faker = Faker()
-    new_user = User(
-        first_name=faker.first_name(),
-        last_name=faker.last_name(),
-        email=faker.email(),
-        hashed_password="*FAKE*",
-    )
-    db.session.add(new_user)
-    db.session.commit()
-    socket_.emit(
-        "new_db_add", {"data": f"New user: {new_user.first_name} {new_user.last_name}"}
-    )
+    print("Not doing much yet")
 
 
 # Need to find all users with unresolved bets

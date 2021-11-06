@@ -23,15 +23,15 @@ def connect_db(app):
     # if app.config["FLASK_ENV"] == "development":
     #     User.query.delete()
     #     Event.query.delete()
-    db.drop_all()
-    db.create_all()
-    seed_database(app, db)
+    # db.drop_all()
+    # db.create_all()
+    # seed_database(app, db)
 
 
 def seed_database(app, db):
     def get_all_NBA_events_current_season():
         current_season_str = (
-                str(datetime.now().year) + "-" + str(datetime.now().year + 1)
+            str(datetime.now().year) + "-" + str(datetime.now().year + 1)
         )
         res = requests.get(
             f"https://www.thesportsdb.com/api/v1/json/{app.config['API_KEY']}/eventsseason.php?id=4387&s={current_season_str}"
@@ -43,28 +43,29 @@ def seed_database(app, db):
         res = get_all_NBA_events_current_season()
         new_events = []
         for r in res["events"]:
-             new_events.append(
+            new_events.append(
                 Event(
                     sportsdb_id=r["idEvent"],
                     title=r["strEvent"],
                     home_team=r["strHomeTeam"],
                     away_team=r["strAwayTeam"],
-                    home_score=r['intHomeScore'],
-                    away_score=r['intAwayScore'],
+                    home_score=r["intHomeScore"],
+                    away_score=r["intAwayScore"],
                     datetime=r["strTimestamp"],
                     date=r["dateEvent"],
-                    sportsdb_status=r['strStatus']
+                    sportsdb_status=r["strStatus"],
                 )
             )
         return new_events
+
     db.session.add_all(add_api_results_to_db())
     db.session.commit()
     # update resolved column for completed games:
-    '''this isn't working:
+    """this isn't working:
     db.session.execute(
         "UPDATE event SET resolved = true WHERE sportsdb_status IN ('FT', 'AOT');"
     )
-    '''
+    """
 
     faker = Faker()
     for _ in range(30):
@@ -76,7 +77,7 @@ def seed_database(app, db):
                 hashed_password="*FAKE*",
             )
         )
-        '''
+        """
         db.session.add(
             (
                 Event(
@@ -88,10 +89,9 @@ def seed_database(app, db):
                 )
             )
         )
-        '''
+        """
     db.session.commit()
     # add user ID of 1 to session ID so we can simulate logged-in user activity
-
 
 
 @login_manager.user_loader

@@ -53,10 +53,8 @@ app.config["SECRET_KEY"] = "my secret"
 app.config["API_KEY"] = "40130162"
 app.debug = True
 login_manager.init_app(app)
-socket_ = SocketIO(app)
 
 connect_db(app)
-socket_.run(app, debug=True)
 from scheduler import start, stop
 
 
@@ -277,25 +275,3 @@ def schedule_stop():
     """Stops scheduler"""
     stop()
     return json.dumps({"result": "stopped"})
-
-
-@socket_.on("my event")
-def get_initial_message(data):
-    print(data)
-
-
-@socket_.on("connect")
-def handle_connect():
-    print("Client connected")
-    clients.append(request.sid)
-
-
-@socket_.on("disconnect")
-def handle_disconnect():
-    print("Client disconnected")
-    clients.remove(request.sid)
-
-
-# @socket_.on("message")
-# def send_message():
-#     emit("my response", {"data": "sending a message here"})

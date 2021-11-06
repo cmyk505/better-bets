@@ -1,3 +1,4 @@
+APScheduler==3.8.1
 backports.zoneinfo==0.2.1
 bcrypt==3.2.0
 bidict==0.21.4
@@ -38,6 +39,7 @@ python-socketio==5.4.1
 pytz==2021.3
 regex==2021.10.8
 requests==2.26.0
+simple-websocket==0.4.0
 six==1.16.0
 SQLAlchemy==1.4.25
 text-unidecode==1.3

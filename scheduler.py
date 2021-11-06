@@ -4,9 +4,9 @@ import datetime
 from datetime import date
 from apscheduler.schedulers.blocking import BlockingScheduler
 import logging
-from app import app, socket_
+from app import app
+
 from tasks import run_tasks
-from variables import clients
 
 
 logging.basicConfig()
