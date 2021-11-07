@@ -77,7 +77,7 @@ logging.basicConfig()
 # logging.getLogger("apscheduler").setLevel(logging.DEBUG)
 
 # HEROKU - UNCOMMENT 87-84
-# sched = BlockingScheduler()
+sched = BlockingScheduler()
 
 
 # @sched.scheduled_job("interval", minutes=20)
@@ -87,7 +87,7 @@ logging.basicConfig()
 #         now = datetime.now()
 #         print(f'Running scheduled task at {now.strftime("%H:%M:%S")}')
 
-sched = BlockingScheduler()
+# sched = BlockingScheduler()
 
 
 @sched.scheduled_job("interval", minutes=3)
