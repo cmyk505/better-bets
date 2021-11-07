@@ -74,20 +74,31 @@ login_manager.init_app(app)
 logging.basicConfig()
 logging.getLogger("apscheduler").setLevel(logging.DEBUG)
 
-
+# HEROKU - UNCOMMENT 87-84
 sched = BlockingScheduler()
-# if you don't wanna use a config, you can set options here:
-# scheduler.api_enabled = True
-# sched.init_app(app)
-sched.start()
 
-# a comment
-@sched.task("interval", id="main-job", seconds=1200)
+
+@sched.scheduled_job("interval", minutes=20)
 def timed_job():
     with app.app_context():
         run_tasks(db)
     now = datetime.now()
     print(f'Running scheduled task at {now.strftime("%H:%M:%S")}')
+
+
+# UNCOMMMENT OUT 81-92 FOR DEV
+# if you don't wanna use a config, you can set options here:
+# scheduler.api_enabled = True
+# sched.init_app(app)
+sched.start()
+
+# # a comment
+# @sched.task("interval", id="main-job", seconds=1200)
+# def timed_job():
+#     with app.app_context():
+#         run_tasks(db)
+#     now = datetime.now()
+#     print(f'Running scheduled task at {now.strftime("%H:%M:%S")}')
 
 
 connect_db(app)
