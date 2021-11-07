@@ -91,7 +91,7 @@ def timed_job():
 # if you don't wanna use a config, you can set options here:
 # scheduler.api_enabled = True
 # sched.init_app(app)
-# sched.start()
+sched.start()
 
 # # a comment
 # @sched.task("interval", id="main-job", seconds=1200)
