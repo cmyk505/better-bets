@@ -50,7 +50,7 @@ from tasks import run_tasks
 login_manager = LoginManager()
 
 app = Flask(__name__)
-# HEROKU - COMMENT OUT 54-62
+# HEROKU - UNCOMMENT OUT 54-62
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
     "DATABASE_URL", "SQLALCHEMY_DATABASE_URI"
 )
@@ -78,7 +78,7 @@ logging.getLogger("apscheduler").setLevel(logging.DEBUG)
 sched = BlockingScheduler()
 
 
-@sched.scheduled_job("interval", hours=1)
+@sched.scheduled_job("interval", minutes=20)
 def timed_job():
     with app.app_context():
         run_tasks(db)
@@ -87,6 +87,7 @@ def timed_job():
 
 
 # UNCOMMMENT OUT 81-92 FOR DEV
+# sched = APScheduler()
 # if you don't wanna use a config, you can set options here:
 # scheduler.api_enabled = True
 # sched.init_app(app)
