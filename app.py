@@ -78,7 +78,7 @@ logging.getLogger("apscheduler").setLevel(logging.DEBUG)
 sched = BlockingScheduler()
 
 
-@sched.scheduled_job("interval", minutes=60)
+@sched.scheduled_job("interval", hours=1)
 def timed_job():
     with app.app_context():
         run_tasks(db)
