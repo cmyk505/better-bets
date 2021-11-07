@@ -45,9 +45,6 @@ from flask_apscheduler import APScheduler
 
 import logging
 
-logging.getLogger("apscheduler").setLevel(logging.DEBUG)
-
-from tasks import run_tasks
 
 login_manager = LoginManager()
 
