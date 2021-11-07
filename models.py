@@ -23,9 +23,9 @@ def connect_db(app):
     # if app.config["FLASK_ENV"] == "development":
     #     User.query.delete()
     #     Event.query.delete()
-    # db.drop_all()
-    # db.create_all()
-    # seed_database(app, db)
+    db.drop_all()
+    db.create_all()
+    seed_database(app, db)
 
 
 def seed_database(app, db):
