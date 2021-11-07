@@ -74,7 +74,8 @@ login_manager.init_app(app)
 logging.basicConfig()
 logging.getLogger("apscheduler").setLevel(logging.DEBUG)
 
-sched = APScheduler()
+
+sched = BlockingScheduler()
 # if you don't wanna use a config, you can set options here:
 # scheduler.api_enabled = True
 sched.init_app(app)
