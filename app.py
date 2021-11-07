@@ -50,10 +50,18 @@ from tasks import run_tasks
 login_manager = LoginManager()
 
 app = Flask(__name__)
-app.config["FLASK_ENV"] = os.environ.get("FLASK_ENV")
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DATABASE_URI")
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
+    "DATABASE_URL", "SQLALCHEMY_DATABASE_URI"
+)
+if app.config["SQLALCHEMY_DATABASE_URI"].startswith("postgres://"):
+    app.config["SQLALCHEMY_DATABASE_URI"] = app.config[
+        "SQLALCHEMY_DATABASE_URI"
+    ].replace("postgres://", "postgresql://", 1)
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
+app.config["FLASK_ENV"] = "production"
+# app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DATABASE_URI_DEV")
 app.config["API_KEY"] = os.environ.get("API_KEY")
-# For David's local env:  app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:heize_stan@localhost/postgres'
+# For David's local env:  app.config['SQLALCHEMY_DATABASE_URI_DEV'] = 'postgresql://postgres:heize_stan@localhost/postgres'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 app.config["SECRET_KEY"] = "my secret"
@@ -71,7 +79,7 @@ sched.init_app(app)
 sched.start()
 
 
-@sched.task("interval", id="main-job", seconds=60)
+@sched.task("interval", id="main-job", seconds=1200)
 def timed_job():
     with app.app_context():
         run_tasks(db)
