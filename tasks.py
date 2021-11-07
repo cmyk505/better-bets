@@ -2,6 +2,7 @@ from flask import Flask, request, session, render_template
 from faker import Faker
 from models import User, Event
 from helpers import convert_to_named_tuple
+from app import db
 import requests
 
 
@@ -103,3 +104,6 @@ def run_tasks(db):
                 {"adjustment": v, "user_id": k},
             )
             db.session.commit()
+
+
+run_tasks(db)
