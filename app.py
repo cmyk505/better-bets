@@ -78,7 +78,7 @@ logging.getLogger("apscheduler").setLevel(logging.DEBUG)
 sched = BlockingScheduler()
 # if you don't wanna use a config, you can set options here:
 # scheduler.api_enabled = True
-sched.init_app(app)
+# sched.init_app(app)
 sched.start()
 
 # a comment
