@@ -3,7 +3,7 @@ from faker import Faker
 from models import User, Event
 from helpers import convert_to_named_tuple
 
-# from app import db, app
+from app import db, app
 import requests
 
 
