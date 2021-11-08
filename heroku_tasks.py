@@ -3,6 +3,7 @@ from faker import Faker
 from models import User, Event
 from helpers import convert_to_named_tuple
 
+from app import db, app
 import requests
 
 
@@ -104,3 +105,8 @@ def run_tasks(db):
                 {"adjustment": v, "user_id": k},
             )
             db.session.commit()
+
+
+# for use on Heroku
+with app.app_context():
+    run_tasks(db)

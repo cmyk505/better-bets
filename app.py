@@ -50,20 +50,14 @@ logging.getLogger("apscheduler").setLevel(logging.DEBUG)
 login_manager = LoginManager()
 
 app = Flask(__name__)
-# HEROKU - UNCOMMENT OUT 54-62
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
-    "DATABASE_URL", "SQLALCHEMY_DATABASE_URI"
+    "DATABASE_URL", os.environ.get("SQLALCHEMY_DATABASE_URI")
 )
-# if app.config["SQLALCHEMY_DATABASE_URI"].startswith("postgres://"):
-#     app.config["SQLALCHEMY_DATABASE_URI"] = app.config[
-#         "SQLALCHEMY_DATABASE_URI"
-#     ].replace("postgres://", "postgresql://", 1)
+
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
-app.config["FLASK_ENV"] = "production"
-app.config["FLASK_ENV"] = os.environ.get("FLASK_ENV", "production")
-# app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DATABASE_URI_DEV")
+app.config["FLASK_ENV"] = os.environ.get("FLASK_ENV", "development")
 app.config["API_KEY"] = os.environ.get("API_KEY")
-# For David's local env:  app.config['SQLALCHEMY_DATABASE_URI_DEV'] = 'postgresql://postgres:heize_stan@localhost/postgres'
+# For David's local env:  app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:heize_stan@localhost/postgres'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 app.config["SECRET_KEY"] = "my secret"
@@ -71,35 +65,22 @@ app.config["API_KEY"] = "40130162"
 app.debug = True
 login_manager.init_app(app)
 
-# logging.basicConfig()
-# logging.getLogger("apscheduler").setLevel(logging.DEBUG)
+logging.basicConfig()
+logging.getLogger("apscheduler").setLevel(logging.DEBUG)
 
-# HEROKU - UNCOMMENT 87-84
-# sched = BlockingScheduler()
+if app.config["FLASK_ENV"] == "development":
+    from tasks import run_tasks
 
+    sched = APScheduler()
+    sched.init_app(app)
+    sched.start()
 
-# @sched.scheduled_job("interval", minutes=20)
-# def timed_job():
-#     with app.app_context():
-#         # run_tasks(db)
-#         now = datetime.now()
-#         print(f'Running scheduled task at {now.strftime("%H:%M:%S")}')
-
-
-# UNCOMMMENT OUT 81-92 FOR DEV
-# sched = APScheduler()
-# if you don't wanna use a config, you can set options here:
-# scheduler.api_enabled = True
-# sched.init_app(app)
-# sched.start()
-
-
-# @sched.task("interval", id="main-job", seconds=1200)
-# def timed_job():
-#     with app.app_context():
-#         run_tasks(db)
-#     now = datetime.now()
-#     print(f'Running scheduled task at {now.strftime("%H:%M:%S")}')
+    @sched.task("interval", id="main-job", seconds=1200)
+    def timed_job():
+        with app.app_context():
+            run_tasks(db)
+        now = datetime.now()
+        print(f'Running scheduled task at {now.strftime("%H:%M:%S")}')
 
 
 connect_db(app)
