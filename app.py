@@ -51,7 +51,8 @@ from tasks import run_tasks
 
 login_manager = LoginManager()
 
-app = Flask(__name__)
+app = Flask(__name__, instance_path='/Volumes/GoogleDrive/My Drive/Classes/SoftwareDevelopmentPracticum/better-bets/instance')
+#app = Flask(__name__)
 # HEROKU - UNCOMMENT OUT 54-62
 # app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
 #     "DATABASE_URL", "SQLALCHEMY_DATABASE_URI"
@@ -62,10 +63,10 @@ app = Flask(__name__)
 #     ].replace("postgres://", "postgresql://", 1)
 # app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 # app.config["FLASK_ENV"] = "production"
-app.config["FLASK_ENV"] = "development"
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DATABASE_URI_DEV")
-app.config["API_KEY"] = os.environ.get("API_KEY")
-# For David's local env:  app.config['SQLALCHEMY_DATABASE_URI_DEV'] = 'postgresql://postgres:heize_stan@localhost/postgres'
+# app.config["FLASK_ENV"] = "development"
+# app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DATABASE_URI_DEV")
+# app.config["API_KEY"] = os.environ.get("API_KEY")
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:heize_stan@localhost/postgres'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 app.config["SECRET_KEY"] = "my secret"
