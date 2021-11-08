@@ -59,7 +59,7 @@ def run_tasks():
             "UPDATE event SET winner = :winner, resolved=:resolved WHERE sportsdb_id = :sportsdb_id",
             {"winner": e["winner"], "resolved": "t", "sportsdb_id": e["idEvent"]},
         )
-        db.session.commit()
+        db.session.commit()  # Liao: I think the execute command above automatically commits the update.
 
         balance_adjustment = {}
         # dictionary to hold user ID and balance adjustment for that user based on newly resolved bet

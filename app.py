@@ -42,7 +42,8 @@ from variables import clients
 
 login_manager = LoginManager()
 
-app = Flask(__name__)
+# David's local env instance path:
+app = Flask(__name__, instance_path="/Volumes/GoogleDrive/My Drive/Classes/SoftwareDevelopmentPracticum/better-bets/instance")
 app.config["FLASK_ENV"] = os.environ.get("FLASK_ENV")
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DATABASE_URI")
 app.config["API_KEY"] = os.environ.get("API_KEY")
