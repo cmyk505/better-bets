@@ -56,11 +56,10 @@ app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
     "DATABASE_URL", "SQLALCHEMY_DATABASE_URI"
 )
-var = 5
-# if app.config["SQLALCHEMY_DATABASE_URI"].startswith("postgres://"):
-#     app.config["SQLALCHEMY_DATABASE_URI"] = app.config[
-#         "SQLALCHEMY_DATABASE_URI"
-#     ].replace("postgres://", "postgresql://", 1)
+if app.config["SQLALCHEMY_DATABASE_URI"].startswith("postgres://"):
+    app.config["SQLALCHEMY_DATABASE_URI"] = app.config[
+        "SQLALCHEMY_DATABASE_URI"
+    ].replace("postgres://", "postgresql://", 1)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 app.config["FLASK_ENV"] = "production"
 # app.config["FLASK_ENV"] = "development"
