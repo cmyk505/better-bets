@@ -56,6 +56,7 @@ app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
     "DATABASE_URL", "SQLALCHEMY_DATABASE_URI"
 )
+var = 5
 # if app.config["SQLALCHEMY_DATABASE_URI"].startswith("postgres://"):
 #     app.config["SQLALCHEMY_DATABASE_URI"] = app.config[
 #         "SQLALCHEMY_DATABASE_URI"
