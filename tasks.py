@@ -108,5 +108,5 @@ def run_tasks(db):
 
 
 # for use on Heroku
-# with app.app_context():
-#     run_tasks(db)
+with app.app_context():
+    run_tasks(db)
