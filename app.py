@@ -39,15 +39,33 @@ from forms import RegistrationForm, LoginForm
 from models import User
 from flask_socketio import SocketIO, emit, disconnect
 from variables import clients
+from datetime import datetime
+from apscheduler.schedulers.blocking import BlockingScheduler
+from flask_apscheduler import APScheduler
+
+import logging
+
+logging.getLogger("apscheduler").setLevel(logging.DEBUG)
+
+from tasks import run_tasks
 
 login_manager = LoginManager()
 
-# David's local env instance path:
-app = Flask(__name__, instance_path="/Volumes/GoogleDrive/My Drive/Classes/SoftwareDevelopmentPracticum/better-bets/instance")
-app.config["FLASK_ENV"] = os.environ.get("FLASK_ENV")
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DATABASE_URI")
+app = Flask(__name__)
+# HEROKU - UNCOMMENT OUT 54-62
+# app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
+#     "DATABASE_URL", "SQLALCHEMY_DATABASE_URI"
+# )
+# if app.config["SQLALCHEMY_DATABASE_URI"].startswith("postgres://"):
+#     app.config["SQLALCHEMY_DATABASE_URI"] = app.config[
+#         "SQLALCHEMY_DATABASE_URI"
+#     ].replace("postgres://", "postgresql://", 1)
+# app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
+# app.config["FLASK_ENV"] = "production"
+app.config["FLASK_ENV"] = "development"
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DATABASE_URI_DEV")
 app.config["API_KEY"] = os.environ.get("API_KEY")
-# For David's local env:  app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:heize_stan@localhost/postgres'
+# For David's local env:  app.config['SQLALCHEMY_DATABASE_URI_DEV'] = 'postgresql://postgres:heize_stan@localhost/postgres'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 app.config["SECRET_KEY"] = "my secret"
@@ -55,11 +73,42 @@ app.config["API_KEY"] = "40130162"
 app.debug = True
 login_manager.init_app(app)
 
-connect_db(app)
-from scheduler import start, stop
+logging.basicConfig()
+# logging.getLogger("apscheduler").setLevel(logging.DEBUG)
 
-# start scheduled tasks
-start()
+# HEROKU - UNCOMMENT 87-84
+# sched = BlockingScheduler()
+
+
+# @sched.scheduled_job("interval", minutes=20)
+# def timed_job():
+#     with app.app_context():
+#         # run_tasks(db)
+#         now = datetime.now()
+#         print(f'Running scheduled task at {now.strftime("%H:%M:%S")}')
+
+
+# UNCOMMMENT OUT 81-92 FOR DEV
+sched = APScheduler()
+# if you don't wanna use a config, you can set options here:
+# scheduler.api_enabled = True
+# sched.init_app(app)
+sched.start()
+
+
+@sched.task("interval", id="main-job", seconds=1200)
+def timed_job():
+    with app.app_context():
+        run_tasks(db)
+    now = datetime.now()
+    print(f'Running scheduled task at {now.strftime("%H:%M:%S")}')
+
+
+connect_db(app)
+
+
+def stop():
+    sched.shutdown()
 
 
 @login_manager.user_loader
@@ -261,21 +310,21 @@ def delete_bet():
 # Route for use testing scheduling functionality
 
 
-@app.route("/test_scheduler", methods=["GET"])
-def render_schedule():
-    """Renders template with button that calls JS to test scheduling functionality"""
-    return render_template("test_scheduler.html")
+# @app.route("/test_scheduler", methods=["GET"])
+# def render_schedule():
+#     """Renders template with button that calls JS to test scheduling functionality"""
+#     return render_template("test_scheduler.html")
 
 
-@app.route("/start", methods=["POST"])
-def schedule_start():
-    """Runs scheduler"""
-    start()
-    return json.dumps({"result": "started"})
+# @app.route("/start", methods=["POST"])
+# def schedule_start():
+#     """Runs scheduler"""
+#     start()
+#     return json.dumps({"result": "started"})
 
 
-@app.route("/stop", methods=["POST"])
-def schedule_stop():
-    """Stops scheduler"""
-    stop()
-    return json.dumps({"result": "stopped"})
+# @app.route("/stop", methods=["POST"])
+# def schedule_stop():
+#     """Stops scheduler"""
+#     stop()
+#     return json.dumps({"result": "stopped"})
