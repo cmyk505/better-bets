@@ -108,6 +108,7 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(200), nullable=False, unique=True)
     hashed_password = db.Column(db.String(100), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
+    can_refill_balance = db.Column(db.Boolean, default=False)
     image_file = db.Column(
         db.String(50), nullable=False, default="defaultProfilePic.jpg"
     )

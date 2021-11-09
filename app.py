@@ -69,18 +69,23 @@ logging.basicConfig()
 logging.getLogger("apscheduler").setLevel(logging.DEBUG)
 
 if app.config["FLASK_ENV"] == "development":
-    from tasks import run_tasks
+    from tasks import run_tasks, update_reload_balance
 
     sched = APScheduler()
     sched.init_app(app)
     sched.start()
 
-    @sched.task("interval", id="main-job", seconds=1200)
+    @sched.task("interval", id="main-job", seconds=60)
     def timed_job():
         with app.app_context():
             run_tasks(db)
         now = datetime.now()
         print(f'Running scheduled task at {now.strftime("%H:%M:%S")}')
+
+    @sched.task("interval", id="balance-update", days=7)
+    def balance_update_job():
+        with app.app_context():
+            update_reload_balance(db)
 
 
 connect_db(app)
@@ -284,6 +289,33 @@ def delete_bet():
     json_data = json.loads(request.data)
     print("pause")
     return json.dumps({"text": f"You bet on {json_data['selection']}"})
+
+
+@app.route("/balance/<id>")
+def reload_balance(id):
+    """Reloads balance if user is eligible"""
+    user_record = convert_to_named_tuple(
+        db.session.execute(
+            "SELECT can_refill_balance FROM users WHERE id = :id", {"id": id}
+        )
+    )
+    if user_record[0].can_refill_balance:
+        db.session.execute(
+            "UPDATE user_balance SET balance = (balance + 500) WHERE user_id = :id",
+            {"id": id},
+        )
+        db.session.execute(
+            "UPDATE users SET can_refill_balance = FALSE WHERE id=:id", {"id": id}
+        )
+        db.session.commit()
+        balance_record = convert_to_named_tuple(
+            db.session.execute(
+                "SELECT balance FROM user_balance WHERE user_id = :id", {"id": id}
+            )
+        )
+        return json.dumps({"balance": balance_record[0].balance, "eligible": True})
+    else:
+        return json.dumps({"eligible": False})
 
 
 # Route for use testing scheduling functionality

@@ -34,8 +34,19 @@ def get_event_result(id):
     return event_info
 
 
+def update_reload_balance(db):
+    users = convert_to_named_tuple(db.session.execute("SELECT id FROM users"))
+    for u in users:
+        db.session.execute(
+            "UPDATE users SET can_refill_balance = TRUE WHERE id=:id", {"id": u.id}
+        )
+
+
 def run_tasks(db):
     """"""
+    # update 'can-reload-balance' flag for all users
+
+    db.session.commit()
     # Below query gets all unresolved events with bets
     unresolved_events = convert_to_named_tuple(
         db.session.execute(
