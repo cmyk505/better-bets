@@ -50,6 +50,7 @@ logging.getLogger("apscheduler").setLevel(logging.DEBUG)
 from tasks import run_tasks
 
 login_manager = LoginManager()
+login_manager.login_view = 'login'
 
 app = Flask(__name__, instance_path='/Volumes/GoogleDrive/My Drive/Classes/SoftwareDevelopmentPracticum/better-bets/instance')
 #app = Flask(__name__)
@@ -197,7 +198,7 @@ def login():
             flash(f"Hi {user.first_name}! You are logged in.")
             return redirect(url_for("render_home_page"))
         else:
-            flash(f"Login Unsuccessful. Please check email and password")
+            flash(f"Login unsuccessful. Please check email and password")
     return render_template("login.html", title="Login", form=form)
 
 
@@ -207,6 +208,17 @@ def logout():
     logout_user()
     flash("You've logged out")
     return redirect(url_for("render_home_page"))
+
+@app.route('/account')
+@login_required
+def account():
+    user_balance = convert_to_named_tuple(
+        db.session.execute(
+            "SELECT balance FROM user_balance WHERE user_id = :user_id",
+            {"user_id": current_user.id},
+        )
+    )[0].balance
+    return render_template('account.html', title='Account', user_balance=user_balance)
 
 
 @app.route("/event/<id>")
