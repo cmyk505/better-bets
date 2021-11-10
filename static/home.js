@@ -7,6 +7,7 @@ document
     //call API with user ID to check if they're eligible to refill balance
     const res = await fetch(`/balance/${userId}`).then(res => res.json());
     const resultsDiv = document.createElement("div");
+    resultsDiv.id = "results-div";
     if (res.eligible) {
       resultsDiv.innerText = `Balance reloaded. New balance is ${res.balance}`;
     } else {

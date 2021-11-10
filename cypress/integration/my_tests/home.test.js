@@ -35,5 +35,19 @@ describe("home page tests", () => {
       cy.get("a").contains("Register").should("not.exist");
       cy.get("a").contains("Log out");
     });
+    it("works to log out", () => {
+      cy.get("a").contains("Log out").click();
+      cy.on("url:changed", newUrl => {
+        expect(newUrl).to.contain("/logout");
+      });
+    });
+
+    it("shows button to reload balance", () => {
+      cy.get("button").contains("Reload Balance").should("exist");
+    });
+    it("outputs text when user clicks to reload balance", () => {
+      cy.get("button").contains("Reload Balance").click();
+      cy.get("div").contains("balance");
+    });
   });
 });
