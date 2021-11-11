@@ -43,10 +43,8 @@ def update_reload_balance(db):
 
 
 def run_tasks(db):
-    """"""
-    # update 'can-reload-balance' flag for all users
+    """Scheduled task to check for resolved events and update user balances accordingly"""
 
-    db.session.commit()
     # Below query gets all unresolved events with bets
     unresolved_events = convert_to_named_tuple(
         db.session.execute(
