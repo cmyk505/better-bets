@@ -48,7 +48,9 @@ import logging
 logging.getLogger("apscheduler").setLevel(logging.DEBUG)
 
 login_manager = LoginManager()
+login_manager.login_view = 'login'
 
+# app = Flask(__name__, instance_path='/Volumes/GoogleDrive/My Drive/Classes/SoftwareDevelopmentPracticum/better-bets/instance')
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
     "DATABASE_URL", os.environ.get("SQLALCHEMY_DATABASE_URI")
@@ -190,6 +192,17 @@ def logout():
     logout_user()
     flash("You've logged out")
     return redirect(url_for("render_home_page"))
+
+@app.route('/account')
+@login_required
+def account():
+    user_balance = convert_to_named_tuple(
+        db.session.execute(
+            "SELECT balance FROM user_balance WHERE user_id = :user_id",
+            {"user_id": current_user.id},
+        )
+    )[0].balance
+    return render_template('account.html', title='Account', user_balance=user_balance)
 
 
 @app.route("/event/<id>")

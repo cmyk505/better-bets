@@ -13,7 +13,9 @@
         <a href="{{ url_for('register') }}">Register</a>
     </div>
     {% else %}
+    <a href="{{ url_for('account') }}">Account</a>
     <a href="{{ url_for('logout') }}">Log out</a>
+
     {% endif %}
 
     <div class="bet-container">
