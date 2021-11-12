@@ -35,7 +35,7 @@ from models import (
     UserMixin,
     login_manager,
 )
-from forms import RegistrationForm, LoginForm
+from forms import RegistrationForm, LoginForm, DeleteUser
 from models import User
 from flask_socketio import SocketIO, emit, disconnect
 from variables import clients
@@ -194,7 +194,7 @@ def logout():
     return redirect(url_for("render_home_page"))
 
 
-@app.route("/account")
+@app.route("/account", methods='GET', 'POST')
 @login_required
 def account():
     user_balance = convert_to_named_tuple(
@@ -203,7 +203,14 @@ def account():
             {"user_id": current_user.id},
         )
     )[0].balance
-    return render_template("account.html", title="Account", user_balance=user_balance)
+    form = DeleteUser()
+    if form.validate_on_submit():
+        email = current_user.email
+        db.session.delete(current_user)
+        db.session.commit()
+        flash(f'Account deleted for {email}')
+        return redirect(url_for('home'))
+    return render_template("account.html", title="Account", user_balance=user_balance, form=form)
 
 
 @app.route("/search")

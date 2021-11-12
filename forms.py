@@ -29,3 +29,6 @@ class LoginForm(FlaskForm):
     password = PasswordField("Password", validators=[DataRequired()])
 
     submit = SubmitField("Login")
+
+class DeleteUser(FlaskForm):
+    submit = SubmitField("Delete Account")

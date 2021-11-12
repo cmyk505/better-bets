@@ -6,10 +6,24 @@
 {% block content %}
     <h1>{{ current_user.first_name }}'s Account</h1>
     <ul style="list-style: none;">
-        <li>{{ current_user.first_name }} {{ current_user.last_name }}</li>
-        <li>{{ current_user.email }}</li>
+        <li>Full name: {{ current_user.first_name }} {{ current_user.last_name }}</li>
+        <li>Email: {{ current_user.email }}</li>
         <li>Your account balance is {{ user_balance }}</li>
     </ul>
     <br>
     <a href="#">Reset password</a>
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        <fieldset class="form-group">
+            <div class="form-group">
+                {{ form.submit() }}
+            </div>
+        </fieldset>
+    </form>
+    <script>
+        function process() {
+            var delete = confirm('Are you sure? This can't be undone');
+            }
+        }
+    </script>
 {% endblock %}
