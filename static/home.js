@@ -16,3 +16,48 @@ document
     document.querySelector("#reload-balance-btn").disabled = true;
     document.querySelector("#balance-info-container").append(resultsDiv);
   });
+
+document
+  .querySelector("input#search-events")
+  .addEventListener("keyup", async e => {
+    console.log("running");
+    const search = await fetch(`/search?q=${e.target.value}`).then(res =>
+      res.json()
+    );
+    const eventCards = document.querySelectorAll(".event-card");
+    for (const ev of eventCards) {
+      ev.parentNode.removeChild(ev);
+    }
+
+    for (const s of search) {
+      let newCard = document.createElement("div");
+      newCard.classList.add("event-card");
+      let a = document.createElement("a");
+      a.href = `/event/${s.id}`;
+      let p = document.createElement("p");
+      a.append(p);
+      p.innerText = s.title;
+
+      let newUl = document.createElement("ul");
+      let teamsLi = document.createElement("li");
+      let dateLi = document.createElement("li");
+      // <div class="event-card">
+      //                 <a href="/event/{{event.id}}">
+      //                     <p>{{event.title}}</p>
+      //                 </a>
+      //                 <ul>
+      //                     <li>{{event.home_team}} vs {{event.away_team}}</li>
+      //                     <li>{{event.date}}</li>
+      //                 </ul>
+      //             </div>
+      teamsLi.innerText = `${s.home_team} vs ${s.away_team}`;
+      dateLi.innerText = `${s.date}`;
+      newUl.append(teamsLi);
+      newUl.append(dateLi);
+
+      newCard.append(a);
+      newCard.append(newUl);
+
+      document.querySelector("#event-list").append(newCard);
+    }
+  });

@@ -39,16 +39,13 @@ def run_tasks(db):
     """"""
     # Below query gets all unresolved events with bets
     unresolved_events = convert_to_named_tuple(
-        db.session.execute(
-            "SELECT e.sportsdb_id, e.id FROM event e JOIN bet b ON b.event = e.id WHERE e.resolved = 'f'"
-        )
+        db.session.execute("SELECT sportsdb_id FROM event WHERE resolved = 'f'")
     )
     if len(unresolved_events) == 0:
         return
     # Then need to make API call
     update_list = []
     for e in unresolved_events:
-        print("hi")
         res = get_event_result(e.sportsdb_id)
         update_list.append(res)
 

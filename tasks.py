@@ -6,7 +6,7 @@ from helpers import convert_to_named_tuple
 import requests
 
 
-def get_event_result(id):
+def get_event_result(id, key):
     required_fields = [
         "idEvent",
         "strEvent",
@@ -19,7 +19,9 @@ def get_event_result(id):
         "dateEvent",
     ]
 
-    api_url = "https://www.thesportsdb.com/api/v1/json/1/lookupevent.php?id=" + str(id)
+    api_url = (
+        f"https://www.thesportsdb.com/api/v1/json/{key}/lookupevent.php?id={str(id)}"
+    )
     data = requests.get(api_url).json()["events"][0]
 
     if data["strStatus"] == "FT" or data["strStatus"] == "AOT":
@@ -30,7 +32,8 @@ def get_event_result(id):
         else:
             event_info.update({"winner": event_info["strAwayTeam"]})
         event_info.update({"resolved": "true"})
-
+    else:
+        event_info = None
     return event_info
 
 
@@ -42,23 +45,21 @@ def update_reload_balance(db):
         )
 
 
-def run_tasks(db):
+def run_tasks(db, key):
     """Scheduled task to check for resolved events and update user balances accordingly"""
 
-    # Below query gets all unresolved events with bets
+    # Below query gets all unresolved events
     unresolved_events = convert_to_named_tuple(
-        db.session.execute(
-            "SELECT e.sportsdb_id, e.id FROM event e JOIN bet b ON b.event = e.id WHERE e.resolved = 'f'"
-        )
+        db.session.execute("SELECT sportsdb_id FROM event WHERE resolved = 'f'")
     )
     if len(unresolved_events) == 0:
         return
     # Then need to make API call
     update_list = []
     for e in unresolved_events:
-        print("hi")
-        res = get_event_result(e.sportsdb_id)
-        update_list.append(res)
+        res = get_event_result(e.sportsdb_id, key)
+        if res is not None:
+            update_list.append(res)
 
     # Need to update database for all events where API call found a result
     # Need to update all unresolved bets linked to events we just resolved
@@ -68,7 +69,7 @@ def run_tasks(db):
             "UPDATE event SET winner = :winner, resolved=:resolved WHERE sportsdb_id = :sportsdb_id",
             {"winner": e["winner"], "resolved": "t", "sportsdb_id": e["idEvent"]},
         )
-        db.session.commit()  # Liao: I think the execute command above automatically commits the update.
+        db.session.commit()
 
         balance_adjustment = {}
         # dictionary to hold user ID and balance adjustment for that user based on newly resolved bet

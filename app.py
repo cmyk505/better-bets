@@ -48,7 +48,7 @@ import logging
 logging.getLogger("apscheduler").setLevel(logging.DEBUG)
 
 login_manager = LoginManager()
-login_manager.login_view = 'login'
+login_manager.login_view = "login"
 
 # app = Flask(__name__, instance_path='/Volumes/GoogleDrive/My Drive/Classes/SoftwareDevelopmentPracticum/better-bets/instance')
 app = Flask(__name__)
@@ -77,10 +77,10 @@ if app.config["FLASK_ENV"] == "development":
     sched.init_app(app)
     sched.start()
 
-    @sched.task("interval", id="main-job", seconds=60)
+    @sched.task("interval", id="main-job", seconds=1200)
     def timed_job():
         with app.app_context():
-            run_tasks(db)
+            run_tasks(db, app.config["API_KEY"])
         now = datetime.now()
         print(f'Running scheduled task at {now.strftime("%H:%M:%S")}')
 
@@ -193,7 +193,8 @@ def logout():
     flash("You've logged out")
     return redirect(url_for("render_home_page"))
 
-@app.route('/account')
+
+@app.route("/account")
 @login_required
 def account():
     user_balance = convert_to_named_tuple(
@@ -202,7 +203,37 @@ def account():
             {"user_id": current_user.id},
         )
     )[0].balance
-    return render_template('account.html', title='Account', user_balance=user_balance)
+    return render_template("account.html", title="Account", user_balance=user_balance)
+
+
+@app.route("/search")
+def search():
+    """For use with JS event listener to filter events on home page"""
+    search = request.args["q"]
+    last_30_days = datetime.today() - timedelta(days=30)
+    month_forward = datetime.today() + timedelta(days=30)
+
+    search_result = (
+        Event.query.filter(
+            Event.title.ilike(f"%{search}%"),
+            Event.date >= datetime.today(),
+            Event.date <= month_forward,
+        )
+        .limit(10)
+        .all()
+    )
+
+    s = [
+        {
+            "title": s.title,
+            "date": str(s.date),
+            "id": s.id,
+            "home_team": s.home_team,
+            "away_team": s.away_team,
+        }
+        for s in search_result
+    ]
+    return json.dumps(s)
 
 
 @app.route("/event/<id>")
