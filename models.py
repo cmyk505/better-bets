@@ -62,11 +62,11 @@ def seed_database(app, db):
     db.session.add_all(add_api_results_to_db())
     db.session.commit()
     # update resolved column for completed games:
-    """this isn't working:
+    """ this isn't working:
     db.session.execute(
         "UPDATE event SET resolved = true WHERE sportsdb_status IN ('FT', 'AOT');"
     )
-    """
+
 
     faker = Faker()
     for _ in range(30):
@@ -78,7 +78,7 @@ def seed_database(app, db):
                 hashed_password="*FAKE*",
             )
         )
-        """
+        
         db.session.add(
             (
                 Event(
@@ -90,8 +90,9 @@ def seed_database(app, db):
                 )
             )
         )
-        """
+        
     db.session.commit()
+    """
     # add user ID of 1 to session ID so we can simulate logged-in user activity
 
 

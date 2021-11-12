@@ -194,7 +194,7 @@ def logout():
     return redirect(url_for("render_home_page"))
 
 
-@app.route("/account", methods='GET', 'POST')
+@app.route("/account", methods=['GET', 'POST'])
 @login_required
 def account():
     user_balance = convert_to_named_tuple(
