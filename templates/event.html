@@ -9,8 +9,13 @@
 <h3 id="event-header">{{event.title}}</h3>
 
 <div id="event-container">
-    <p>Some details here about the event...</p>
+    {% if event.resolved %}
+    <p>Winner: {{event.winner}}</p>
+    {{event.home_team}}: {{event.home_score}}
+    {{event.away_team}}: {{event.away_score}}
+    {% endif %}
     <form action="submit" id="bet-form">
+        {% if event.resolved == False %}
         {% if bet_on %}
         <p>You bet {{bet.amount}} on {{bet.selection}}</p>
         <p>Result: {{result}}</p>
@@ -24,7 +29,8 @@
         <input type="number" name="amount" id="bet-amt" min=1 max=1000>
         <button data-event_id={{event.id}} id="bet-btn">bet</button>
         {% endif %}
-        {% if result != 'Undecided' %}
+        {% endif %}
+        {% if result != 'Undecided' and bet_on %}
         <p>Win/loss: {{bet.final_margin}}</p>
         {% endif %}
     </form>

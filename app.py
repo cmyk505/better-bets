@@ -37,21 +37,65 @@ from models import (
 )
 from forms import RegistrationForm, LoginForm
 from models import User
+from flask_socketio import SocketIO, emit, disconnect
+from variables import clients
+from datetime import datetime
+from apscheduler.schedulers.blocking import BlockingScheduler
+from flask_apscheduler import APScheduler
+
+import logging
+
+logging.getLogger("apscheduler").setLevel(logging.DEBUG)
 
 login_manager = LoginManager()
+login_manager.login_view = "login"
 
+# app = Flask(__name__, instance_path='/Volumes/GoogleDrive/My Drive/Classes/SoftwareDevelopmentPracticum/better-bets/instance')
 app = Flask(__name__)
-# app.config["FLASK_ENV"] = os.environ.get("FLASK_ENV")
-# app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DATABASE_URI")
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
+    "DATABASE_URL", os.environ.get("SQLALCHEMY_DATABASE_URI")
+)
+
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
+app.config["FLASK_ENV"] = os.environ.get("FLASK_ENV", "development")
+app.config["API_KEY"] = os.environ.get("API_KEY")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:040839@localhost/postgres'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 app.config["SECRET_KEY"] = "my secret"
-app.config['API_KEY'] = '40130162'
+app.config["API_KEY"] = "40130162"
 app.debug = True
 login_manager.init_app(app)
 
+logging.basicConfig()
+logging.getLogger("apscheduler").setLevel(logging.DEBUG)
+
+if app.config["FLASK_ENV"] == "development":
+    from tasks import run_tasks, update_reload_balance
+
+    sched = APScheduler()
+    sched.init_app(app)
+    sched.start()
+
+    @sched.task("interval", id="main-job", seconds=1200)
+    def timed_job():
+        with app.app_context():
+            run_tasks(db, app.config["API_KEY"])
+        now = datetime.now()
+        print(f'Running scheduled task at {now.strftime("%H:%M:%S")}')
+
+    @sched.task("interval", id="balance-update", days=7)
+    def balance_update_job():
+        with app.app_context():
+            update_reload_balance(db)
+
+
 connect_db(app)
+
+
+def stop():
+    sched.shutdown()
+
 
 @login_manager.user_loader
 def load_user(userid):
@@ -148,6 +192,48 @@ def logout():
     logout_user()
     flash("You've logged out")
     return redirect(url_for("render_home_page"))
+
+
+@app.route("/account")
+@login_required
+def account():
+    user_balance = convert_to_named_tuple(
+        db.session.execute(
+            "SELECT balance FROM user_balance WHERE user_id = :user_id",
+            {"user_id": current_user.id},
+        )
+    )[0].balance
+    return render_template("account.html", title="Account", user_balance=user_balance)
+
+
+@app.route("/search")
+def search():
+    """For use with JS event listener to filter events on home page"""
+    search = request.args["q"]
+    last_30_days = datetime.today() - timedelta(days=30)
+    month_forward = datetime.today() + timedelta(days=30)
+
+    search_result = (
+        Event.query.filter(
+            Event.title.ilike(f"%{search}%"),
+            Event.date >= datetime.today(),
+            Event.date <= month_forward,
+        )
+        .limit(10)
+        .all()
+    )
+
+    s = [
+        {
+            "title": s.title,
+            "date": str(s.date),
+            "id": s.id,
+            "home_team": s.home_team,
+            "away_team": s.away_team,
+        }
+        for s in search_result
+    ]
+    return json.dumps(s)
 
 
 @app.route("/event/<id>")
@@ -250,9 +336,59 @@ def update_bet():
     event = Event.query.get(json_data["eventId"])
 
 
-# @app.route("/api/bet", methods=["DELETE"])
-# def delete_bet():
-#     """Receives JSON posted from JS event listener with event ID user is deleting and updates database"""
-#     json_data = json.loads(request.data)
-#     print("pause")
-#     return json.dumps({"text": f"You bet on {json_data['selection']}"})
+@app.route("/api/bet", methods=["DELETE"])
+def delete_bet():
+    """Receives JSON posted from JS event listener with event ID user is deleting and updates database"""
+    json_data = json.loads(request.data)
+    print("pause")
+    return json.dumps({"text": f"You bet on {json_data['selection']}"})
+
+
+@app.route("/balance/<id>")
+def reload_balance(id):
+    """Reloads balance if user is eligible"""
+    user_record = convert_to_named_tuple(
+        db.session.execute(
+            "SELECT can_refill_balance FROM users WHERE id = :id", {"id": id}
+        )
+    )
+    if user_record[0].can_refill_balance:
+        db.session.execute(
+            "UPDATE user_balance SET balance = (balance + 500) WHERE user_id = :id",
+            {"id": id},
+        )
+        db.session.execute(
+            "UPDATE users SET can_refill_balance = FALSE WHERE id=:id", {"id": id}
+        )
+        db.session.commit()
+        balance_record = convert_to_named_tuple(
+            db.session.execute(
+                "SELECT balance FROM user_balance WHERE user_id = :id", {"id": id}
+            )
+        )
+        return json.dumps({"balance": balance_record[0].balance, "eligible": True})
+    else:
+        return json.dumps({"eligible": False})
+
+
+# Route for use testing scheduling functionality
+
+
+# @app.route("/test_scheduler", methods=["GET"])
+# def render_schedule():
+#     """Renders template with button that calls JS to test scheduling functionality"""
+#     return render_template("test_scheduler.html")
+
+
+# @app.route("/start", methods=["POST"])
+# def schedule_start():
+#     """Runs scheduler"""
+#     start()
+#     return json.dumps({"result": "started"})
+
+
+# @app.route("/stop", methods=["POST"])
+# def schedule_stop():
+#     """Stops scheduler"""
+#     stop()
+#     return json.dumps({"result": "stopped"})
