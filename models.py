@@ -24,8 +24,8 @@ def connect_db(app):
     #     User.query.delete()
     #     Event.query.delete()
     # HEROKU - COMMENT OUT NEXT 3 LINES
-    # db.drop_all()
-    # db.create_all()
+    db.drop_all()
+    db.create_all()
     # seed_database(app, db)
 
 
@@ -196,7 +196,6 @@ class Bet(db.Model):
     event = db.Column(db.Integer, db.ForeignKey("event.id"), nullable=False)
     event_date = db.Column(db.Date, nullable=False)
     selection = db.Column(db.String(100), nullable=False)
-    result = db.String(db.String(1))
     final_margin = db.Column(db.Integer, default=0)
     amount = db.Column(db.Integer, nullable=False)
 

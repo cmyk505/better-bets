@@ -41,15 +41,6 @@ document
       let newUl = document.createElement("ul");
       let teamsLi = document.createElement("li");
       let dateLi = document.createElement("li");
-      // <div class="event-card">
-      //                 <a href="/event/{{event.id}}">
-      //                     <p>{{event.title}}</p>
-      //                 </a>
-      //                 <ul>
-      //                     <li>{{event.home_team}} vs {{event.away_team}}</li>
-      //                     <li>{{event.date}}</li>
-      //                 </ul>
-      //             </div>
       teamsLi.innerText = `${s.home_team} vs ${s.away_team}`;
       dateLi.innerText = `${s.date}`;
       newUl.append(teamsLi);
