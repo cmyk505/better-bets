@@ -12,13 +12,14 @@
     </ul>
     <br>
     <a href="#">Reset password</a>
+    <hr>
     <form method="POST" action="">
         {{ form.hidden_tag() }}
-        <fieldset class="form-group">
+        <!-- <fieldset class="form-group"> -->
             <div class="form-group">
                 {{ form.submit() }}
             </div>
-        </fieldset>
+        <!-- </fieldset> -->
     </form>
     <script>
         function process() {
