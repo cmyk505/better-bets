@@ -43,7 +43,7 @@ login_manager = LoginManager()
 app = Flask(__name__)
 # app.config["FLASK_ENV"] = os.environ.get("FLASK_ENV")
 # app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DATABASE_URI")
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:heize_stan@localhost/postgres'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:040839@localhost/postgres'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 app.config["SECRET_KEY"] = "my secret"
@@ -160,7 +160,8 @@ def render_event(id):
 
     if event is not None and current_user.is_authenticated:
         bet = Bet.query.filter(
-            Bet.event == event.id, Bet.user_id == current_user.id
+            Bet.event == event.id,
+            Bet.user_id == current_user.id
         ).first()
     else:
         bet = None
@@ -234,8 +235,13 @@ def place_bet():
         )
 
 @app.route("/test")
+def testC():
+    return render_template("form.html")
+
+@app.route("/test", methods = ["POST"])
 def test():
-    return "Hello world!!! This is a test"
+    return "Hello World!!"
+
 
 @app.route("/api/bet", methods=["PATCH"])
 def update_bet():

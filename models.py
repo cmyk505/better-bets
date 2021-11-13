@@ -78,6 +78,7 @@ def seed_database(app, db):
         )
         '''
         db.session.add(
+        
             (
                 Event(
                     sportsdb_id=faker.unique.random_int(),
