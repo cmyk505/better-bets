@@ -24,7 +24,7 @@ def connect_db(app):
     #     User.query.delete()
     #     Event.query.delete()
     # HEROKU - COMMENT OUT NEXT 3 LINES
-    db.drop_all()
+    # db.drop_all()
     db.create_all()
     # seed_database(app, db)
 
