@@ -1,4 +1,3 @@
-from flask import Flask, request, session, render_template
 from faker import Faker
 from models import User, Event
 from helpers import convert_to_named_tuple
