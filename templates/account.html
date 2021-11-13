@@ -13,18 +13,36 @@
     <br>
     <a href="#">Reset password</a>
     <hr>
+    <button type='button' class="btn btn-danger" id="myBtn">Delete Account</button>
+    <!-- Modal to confirm account deletion -->
+    <div id="myModal" class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header" style="text-align:center;">
+            <h4 class="modal-title" style="color:red;" id="deleteModalLabel">Are you sure? This can't be undone!</h4>
+          </div>
+
+          <div class="modal-footer" style="text-align:center;">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="Delete()">Delete Account</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+        var modal = document.getElementById('myModal');
+        var btn = document.getElementById('myBtn');
+        btn.onclick = function () {
+            modal.style.display = 'block';
+        }
+    </script>
+    <!--
     <form method="POST" action="">
         {{ form.hidden_tag() }}
-        <!-- <fieldset class="form-group"> -->
             <div class="form-group">
                 {{ form.submit() }}
             </div>
-        <!-- </fieldset> -->
     </form>
-    <script>
-        function process() {
-            var delete = confirm('Are you sure? This can't be undone');
-            }
-        }
-    </script>
+    -->
+
 {% endblock %}

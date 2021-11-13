@@ -203,6 +203,8 @@ def account():
             {"user_id": current_user.id},
         )
     )[0].balance
+
+    # if user clicks on the Delete Account button:
     form = DeleteUser()
     if form.validate_on_submit():
         email = current_user.email
