@@ -15,7 +15,7 @@
         <li>Your account balance is {{ user_balance }}</li>
     </ul>
     <br>
-    <a href="#">Reset password</a>
+    <a href="{{ url_for('change_password') }}">Change Password</a>
     <hr>
     <button type='button' class="btn btn-danger" id="myBtn" data-toggle="modal">Delete Account</button>
     <!-- Modal to confirm account deletion -->

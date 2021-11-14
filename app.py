@@ -70,24 +70,25 @@ login_manager.init_app(app)
 logging.basicConfig()
 logging.getLogger("apscheduler").setLevel(logging.DEBUG)
 
-if app.config["FLASK_ENV"] == "development":
-    from tasks import run_tasks, update_reload_balance
+# liao's environment: no if
+# if app.config["FLASK_ENV"] == "development":
+from tasks import run_tasks, update_reload_balance
 
-    sched = APScheduler()
-    sched.init_app(app)
-    sched.start()
+sched = APScheduler()
+sched.init_app(app)
+sched.start()
 
-    @sched.task("interval", id="main-job", seconds=120)
-    def timed_job():
-        with app.app_context():
-            run_tasks(db, app.config["API_KEY"])
-        now = datetime.now()
-        print(f'Running scheduled task at {now.strftime("%H:%M:%S")}')
+@sched.task("interval", id="main-job", seconds=120)
+def timed_job():
+    with app.app_context():
+        run_tasks(db, app.config["API_KEY"])
+    now = datetime.now()
+    print(f'Running scheduled task at {now.strftime("%H:%M:%S")}')
 
-    @sched.task("interval", id="balance-update", days=7)
-    def balance_update_job():
-        with app.app_context():
-            update_reload_balance(db)
+@sched.task("interval", id="balance-update", days=7)
+def balance_update_job():
+    with app.app_context():
+        update_reload_balance(db)
 
 
 connect_db(app)
@@ -193,6 +194,7 @@ def logout():
     flash("You've logged out")
     return redirect(url_for("render_home_page"))
 
+
 @app.route("/account", methods=['GET', 'POST'])
 @login_required
 def account():
@@ -217,20 +219,23 @@ def account():
         return redirect(url_for('render_home_page'))
     return render_template("account.html", title="Account", user_balance=user_balance, form=form)
 
-@app.route('/change-password')
+
+@app.route('/change-password', methods=['GET', 'POST'])
 @login_required
 def change_password():
     form = ChangePasswordForm()
     if form.validate_on_submit():
-        if current_user.hashed_password == bcrypt.check_password_hash(form.old_password.data):
-            new_hashed_password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
+        if bcrypt.check_password_hash(current_user.hashed_password, form.old_password.data):
             db.session.execute(
                 "UPDATE users SET hashed_password = 'new_hashed_password' WHERE user_id = :user_id",
             {"user_id": current_user.id},
         )
             flash(f'Password successfully changed')
             return redirect(url_for('account'))
+        else:
+            flash(f'Password change unsuccessful. Please check your password and try again.')
     return render_template('change-password.html', title='Change Password', form=form)
+# todo create change-password.html template
 
 
 @app.route("/search")
