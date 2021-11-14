@@ -7,7 +7,7 @@ from app import db, app
 import requests
 
 
-def get_event_result(id):
+def get_event_result(id, key):
     required_fields = [
         "idEvent",
         "strEvent",
@@ -20,7 +20,9 @@ def get_event_result(id):
         "dateEvent",
     ]
 
-    api_url = "https://www.thesportsdb.com/api/v1/json/1/lookupevent.php?id=" + str(id)
+    api_url = (
+        f"https://www.thesportsdb.com/api/v1/json/{key}/lookupevent.php?id={str(id)}"
+    )
     data = requests.get(api_url).json()["events"][0]
 
     if data["strStatus"] == "FT" or data["strStatus"] == "AOT":
@@ -35,7 +37,7 @@ def get_event_result(id):
     return event_info
 
 
-def run_tasks(db):
+def run_tasks(db, key):
     """"""
     # Below query gets all unresolved events with bets
     unresolved_events = convert_to_named_tuple(
@@ -46,7 +48,7 @@ def run_tasks(db):
     # Then need to make API call
     update_list = []
     for e in unresolved_events:
-        res = get_event_result(e.sportsdb_id)
+        res = get_event_result(e.sportsdb_id, key)
         update_list.append(res)
 
     # Need to update database for all events where API call found a result
@@ -106,4 +108,4 @@ def run_tasks(db):
 
 # for use on Heroku
 with app.app_context():
-    run_tasks(db)
+    run_tasks(db, app.config["API_KEY"])

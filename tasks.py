@@ -80,7 +80,6 @@ def run_tasks(db, key):
             )
         )
         # event to get event ID in database as opposed to eventsdb_id (from API)
-
         bets = db.session.execute(
             "SELECT id, amount, selection, user_id FROM bet WHERE event = :id",
             {"id": event[0].id},
