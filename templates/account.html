@@ -7,7 +7,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-
+    <a href="{{ url_for('render_home_page') }}">Home</a>
     <h1>{{ current_user.first_name }}'s Account</h1>
     <ul style="list-style: none;">
         <li>Full name: {{ current_user.first_name }} {{ current_user.last_name }}</li>

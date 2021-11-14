@@ -225,11 +225,14 @@ def account():
 def change_password():
     form = ChangePasswordForm()
     if form.validate_on_submit():
+        new_hashed_password = bcrypt.generate_password_hash(form.new_password.data).decode("utf-8")
+        print(f'new hashed pw: {new_hashed_password}')
         if bcrypt.check_password_hash(current_user.hashed_password, form.old_password.data):
             db.session.execute(
-                "UPDATE users SET hashed_password = 'new_hashed_password' WHERE user_id = :user_id",
-            {"user_id": current_user.id},
+                "UPDATE users SET hashed_password = :new_hashed_password WHERE id = :user_id",
+            {"user_id": current_user.id, 'new_hashed_password': new_hashed_password},
         )
+            db.session.commit()
             flash(f'Password successfully changed')
             return redirect(url_for('account'))
         else:
