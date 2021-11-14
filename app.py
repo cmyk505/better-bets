@@ -35,7 +35,7 @@ from models import (
     UserMixin,
     login_manager,
 )
-from forms import RegistrationForm, LoginForm, DeleteUser
+from forms import RegistrationForm, LoginForm, DeleteUser, ChangePasswordForm
 from models import User
 from flask_socketio import SocketIO, emit, disconnect
 from variables import clients
@@ -77,7 +77,7 @@ if app.config["FLASK_ENV"] == "development":
     sched.init_app(app)
     sched.start()
 
-    @sched.task("interval", id="main-job", seconds=1200)
+    @sched.task("interval", id="main-job", seconds=120)
     def timed_job():
         with app.app_context():
             run_tasks(db, app.config["API_KEY"])
@@ -150,7 +150,7 @@ def register():
         db.session.add(user)
         db.session.commit()
         flash(
-            f"Account created for {form.email.data}!🙌🏼 You can now log in.", "success"
+            f"Account created for {form.email.data}! 🙌🏼 You can now log in.", "success"
         )
 
         # create UserBalance record in DB
@@ -193,7 +193,6 @@ def logout():
     flash("You've logged out")
     return redirect(url_for("render_home_page"))
 
-
 @app.route("/account", methods=['GET', 'POST'])
 @login_required
 def account():
@@ -203,7 +202,6 @@ def account():
             {"user_id": current_user.id},
         )
     )[0].balance
-
     # if user clicks on the Delete Account button:
     form = DeleteUser()
     if form.validate_on_submit():
@@ -218,6 +216,21 @@ def account():
         flash(f'Account deleted for {email}')
         return redirect(url_for('render_home_page'))
     return render_template("account.html", title="Account", user_balance=user_balance, form=form)
+
+@app.route('/change-password')
+@login_required
+def change_password():
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        if current_user.hashed_password == bcrypt.check_password_hash(form.old_password.data):
+            new_hashed_password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
+            db.session.execute(
+                "UPDATE users SET hashed_password = 'new_hashed_password' WHERE user_id = :user_id",
+            {"user_id": current_user.id},
+        )
+            flash(f'Password successfully changed')
+            return redirect(url_for('account'))
+    return render_template('change-password.html', title='Change Password', form=form)
 
 
 @app.route("/search")
