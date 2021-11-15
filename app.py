@@ -78,12 +78,14 @@ sched = APScheduler()
 sched.init_app(app)
 sched.start()
 
+
 @sched.task("interval", id="main-job", seconds=120)
 def timed_job():
     with app.app_context():
         run_tasks(db, app.config["API_KEY"])
     now = datetime.now()
     print(f'Running scheduled task at {now.strftime("%H:%M:%S")}')
+
 
 @sched.task("interval", id="balance-update", days=7)
 def balance_update_job():
@@ -108,7 +110,9 @@ def load_user(userid):
 def render_home_page():
     """Render home page with 10 upcoming events"""
 
-    events = Event.query.filter(Event.date >= date.today()).limit(10)
+    events = Event.query.filter(
+        Event.date >= date.today(), Event.date <= date.today() + timedelta(days=7)
+    ).limit(10)
 
     # if logged in, show user their 10 most recent bets
     last_30_days = datetime.today() - timedelta(days=30)
@@ -195,7 +199,7 @@ def logout():
     return redirect(url_for("render_home_page"))
 
 
-@app.route("/account", methods=['GET', 'POST'])
+@app.route("/account", methods=["GET", "POST"])
 @login_required
 def account():
     user_balance = convert_to_named_tuple(
@@ -215,29 +219,42 @@ def account():
         )
         db.session.delete(current_user)
         db.session.commit()
-        flash(f'Account deleted for {email}')
-        return redirect(url_for('render_home_page'))
-    return render_template("account.html", title="Account", user_balance=user_balance, form=form)
+        flash(f"Account deleted for {email}")
+        return redirect(url_for("render_home_page"))
+    return render_template(
+        "account.html", title="Account", user_balance=user_balance, form=form
+    )
 
 
-@app.route('/change-password', methods=['GET', 'POST'])
+@app.route("/change-password", methods=["GET", "POST"])
 @login_required
 def change_password():
     form = ChangePasswordForm()
     if form.validate_on_submit():
-        new_hashed_password = bcrypt.generate_password_hash(form.new_password.data).decode("utf-8")
-        print(f'new hashed pw: {new_hashed_password}')
-        if bcrypt.check_password_hash(current_user.hashed_password, form.old_password.data):
+        new_hashed_password = bcrypt.generate_password_hash(
+            form.new_password.data
+        ).decode("utf-8")
+        print(f"new hashed pw: {new_hashed_password}")
+        if bcrypt.check_password_hash(
+            current_user.hashed_password, form.old_password.data
+        ):
             db.session.execute(
                 "UPDATE users SET hashed_password = :new_hashed_password WHERE id = :user_id",
-            {"user_id": current_user.id, 'new_hashed_password': new_hashed_password},
-        )
+                {
+                    "user_id": current_user.id,
+                    "new_hashed_password": new_hashed_password,
+                },
+            )
             db.session.commit()
-            flash(f'Password successfully changed')
-            return redirect(url_for('account'))
+            flash(f"Password successfully changed")
+            return redirect(url_for("account"))
         else:
-            flash(f'Password change unsuccessful. Please check your password and try again.')
-    return render_template('change-password.html', title='Change Password', form=form)
+            flash(
+                f"Password change unsuccessful. Please check your password and try again."
+            )
+    return render_template("change-password.html", title="Change Password", form=form)
+
+
 # todo create change-password.html template
 
 
@@ -309,10 +326,12 @@ def render_event(id):
 
 
 @app.route("/api/bet", methods=["POST"])
-@login_required
 def place_bet():
     """Receives JSON posted from JS event listener with 1) event ID user is betting on 2) user's bet. We can retrieve current user ID from Flask session to update database"""
-    # TODO these routes should be protected/have validation
+
+    if current_user.is_authenticated is False:
+        return json.dumps({"text": "Please login or register to place a bet"})
+
     json_data = json.loads(request.data)
     # get the selection + event ID + amt the user bet
     selection = json_data["selection"]

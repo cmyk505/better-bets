@@ -31,7 +31,7 @@ describe("home page tests", () => {
       cy.get("input").contains("Login").click();
     });
     it("shows different content when logged in", () => {
-      cy.get("a").contains("Sign In").should("not.exist");
+      cy.get("a").contains("Login").should("not.exist");
       cy.get("a").contains("Register").should("not.exist");
       cy.get("a").contains("Log out");
     });
