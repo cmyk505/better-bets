@@ -8,6 +8,7 @@ from flask_login import LoginManager, UserMixin
 from sqlalchemy.orm import relationship
 from sqlalchemy import update
 
+# fmt: off
 
 # using bcrypt for password hashing
 db = SQLAlchemy()
@@ -23,10 +24,9 @@ def connect_db(app):
     # if app.config["FLASK_ENV"] == "development":
     #     User.query.delete()
     # Event.query.delete()
-    # db.drop_all()
-    # db.create_all()
-    # seed_database(app, db)
-    # HEROKU - COMMENT OUT NEXT 3 LINES
+    db.drop_all()
+    db.create_all()
+    seed_database(app, db)
 
 
 def seed_database(app, db):
@@ -55,6 +55,7 @@ def seed_database(app, db):
                     datetime=r["strTimestamp"],
                     date=r["dateEvent"],
                     sportsdb_status=r["strStatus"],
+                    strThumb=r["strThumb"],
                 )
             )
         return new_events
@@ -170,12 +171,12 @@ class Event(db.Model):
     away_score = db.Column(db.Integer)
     datetime = db.Column(db.DateTime)
     sportsdb_status = db.Column(db.String, nullable=False)
-    resolved = db.Column(db.Boolean, default=False)
-    winner = db.Column(db.String(50), default="Undecided")
     date = db.Column(db.Date, nullable=False)
-
+    resolved = db.Column(db.Boolean, default=False)
+    winner = db.Column(db.String(50),default="Undecided")
+    strThumb = db.Column(db.String(500))
     bets = db.relationship("Bet", backref="event_ref")
-
+    # fmt: on
     # write methods
     # 1 call api, use sqlalchemy to get event data, write to db
     # 2 determine the winner

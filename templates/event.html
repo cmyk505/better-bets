@@ -6,34 +6,40 @@
 <link rel="stylesheet" href="../static/event.css">{% endblock %}
 
 {% block content %}
-<h3 id="event-header">{{event.title}}</h3>
 
-<div id="event-container">
-    {% if event.resolved %}
-    <p>Winner: {{event.winner}}</p>
-    {{event.home_team}}: {{event.home_score}}
-    {{event.away_team}}: {{event.away_score}}
-    {% endif %}
-    <form action="submit" id="bet-form">
-        {% if event.resolved == False %}
-        {% if bet_on %}
-        <p>You bet {{bet.amount}} on {{bet.selection}}</p>
-        <p>Result: {{result}}</p>
-        {% else %}
-        <label for="bet-selection">select winning team</label>
-        <select name="bet" id="bet-selection">
-            <option value="{{event.home_team}}">{{event.home_team}}</option>
-            <option value="{{event.away_team}}">{{event.away_team}}</option>
-        </select>
-        <label>amount</label>
-        <input type="number" name="amount" id="bet-amt" min=1 max=1000>
-        <button data-event_id={{event.id}} id="bet-btn">bet</button>
+<div id="event-container" class="card">
+    <h3 id="event-header" class="card-header">{{event.title}} on {{event.date}}</h3>
+    <div class="card-body">
+        {% if event.resolved %}
+        <p>Winner: {{event.winner}}</p>
+        {{event.home_team}}: {{event.home_score}}
+        {{event.away_team}}: {{event.away_score}}
         {% endif %}
-        {% endif %}
-        {% if result != 'Undecided' and bet_on %}
-        <p>Win/loss: {{bet.final_margin}}</p>
-        {% endif %}
-    </form>
+        <form action="submit" id="bet-form">
+            {% if event.resolved == False %}
+            {% if bet_on %}
+            <p>You bet {{bet.amount}} on {{bet.selection}}</p>
+            <p>Result: {{result}}</p>
+            {% else %}
+            <div class="col d-flex justify-content-center">
+                <label class="p-3">Bet </label>
+                <input type="number" name="amount" id="bet-amt" min=1 max=1000 class="mb-3">
+                <label for="bet-selection" class="p-3">on</label>
+                <select name="bet" id="bet-selection" class="mb-3">
+                    <option value="{{event.home_team}}">{{event.home_team}}</option>
+                    <option value="{{event.away_team}}">{{event.away_team}}</option>
+                </select>
+            </div>
+
+            <img src={{event.strThumb}} alt="logos for NBA teams in event" class="img-fluid">
+            <button class="btn btn-primary btn-lg" data-event_id={{event.id}} id="bet-btn">bet</button>
+            {% endif %}
+            {% endif %}
+            {% if result != 'Undecided' and bet_on %}
+            <p>Win/loss: {{bet.final_margin}}</p>
+            {% endif %}
+        </form>
+    </div>
     <div id="api-response-container">
         <div id="bet-details"></div>
     </div>
