@@ -25,8 +25,8 @@ def connect_db(app):
     #     User.query.delete()
     # Event.query.delete()
     # db.drop_all()
-    db.create_all()
-    seed_database(app, db)
+    # db.create_all()
+    # seed_database(app, db)
 
 
 def seed_database(app, db):
