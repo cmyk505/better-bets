@@ -110,9 +110,13 @@ def load_user(userid):
 def render_home_page():
     """Render home page with 10 upcoming events"""
 
-    events = Event.query.filter(
-        Event.date >= date.today(), Event.date <= date.today() + timedelta(days=7)
-    ).limit(10)
+    events = (
+        Event.query.filter(
+            Event.date >= date.today(), Event.date <= date.today() + timedelta(days=7)
+        )
+        .order_by(Event.date.asc())
+        .limit(10)
+    )
 
     # if logged in, show user their 10 most recent bets
     last_30_days = datetime.today() - timedelta(days=30)
