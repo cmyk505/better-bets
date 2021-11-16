@@ -34,6 +34,7 @@ from models import (
     LoginManager,
     UserMixin,
     login_manager,
+    Comment
 )
 from forms import RegistrationForm, LoginForm
 from models import User
@@ -322,22 +323,19 @@ def place_bet():
 
 @app.route("/test/<event>", methods=['POST'])
 def create_comment(event):
-    text = request.form.get(id = event)
+    text = request.args.get("id")
     if not text:
         flash("comment can't be created", category = 'error')
     else:
-        event = event.query.filter_by(id = event)
+        event = Event.query.filter_by(id = text).first()
     if event:
-        comment = Comment(text=text, commenter=current_user.id, event = event.id)
+        comment = Comment(comment=text, commenter=current_user.id, event = event.id, date = datetime.today())
         db.session.add(comment)
         db.session.commit()
     else:
         flash("comment can't be created", category = 'error')
 
-    return redirect(url_for('app.home'))
-
-
-
+    return redirect(url_for('render_home_page'))
 
 '''
 @app.route("/test", methods = ["POST"])

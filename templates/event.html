@@ -53,7 +53,7 @@
 
 <script src="../static/event.js"></script>
 
-<form class = "input-group md-3" action = "/test/{{event.id}}" method = "POST">
+<form class = "input-group md-3" action = "/test/{{event.id}}?id={{event.id}}" method = "POST">
         <div>
             <label>Name</label>
             <input name = "Name">
@@ -64,13 +64,13 @@
         </div>
         <div>
             <input
-              type =text
-              id = "text"
+              type ="text"
+              id = {{ event.id }}
               name="text"
               class="form-control"
               placeholder="comment something"
             />
         </div>
-        <button>type = "submit" class = btn btn-primary">Comment</button>
+        <button> name = "id" value = {{ event.id }} type = "submit" class = btn btn-primary">Comment</button>
 </form>
 {% endblock %}
