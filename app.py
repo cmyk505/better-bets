@@ -320,14 +320,30 @@ def place_bet():
             {"text": f"You bet on {selection}. New balance is {new_balance}"}
         )
 
-@app.route("/test")
-def testC():
-    return render_template("form.html")
+@app.route("/test/<event>", methods=['POST'])
+def create_comment(event):
+    text = request.form.get(id = event)
+    if not text:
+        flash("comment can't be created", category = 'error')
+    else:
+        event = event.query.filter_by(id = event)
+    if event:
+        comment = Comment(text=text, commenter=current_user.id, event = event.id)
+        db.session.add(comment)
+        db.session.commit()
+    else:
+        flash("comment can't be created", category = 'error')
 
+    return redirect(url_for('app.home'))
+
+
+
+
+'''
 @app.route("/test", methods = ["POST"])
 def test():
     return "Hello World!!"
-
+'''
 
 @app.route("/api/bet", methods=["PATCH"])
 def update_bet():
@@ -372,6 +388,9 @@ def reload_balance(id):
 
 
 # Route for use testing scheduling functionality
+
+
+
 
 
 # @app.route("/test_scheduler", methods=["GET"])
