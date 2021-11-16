@@ -112,7 +112,9 @@ def render_home_page():
 
     events = (
         Event.query.filter(
-            Event.date >= datetime.today(), Event.date <= (datetime.today() + timedelta(days=7))
+            Event.date >= datetime.today(),
+            Event.resolved == False,
+            Event.date <= (datetime.today() + timedelta(days=7)),
         )
         .order_by(Event.date.asc())
         .limit(10)
@@ -266,13 +268,19 @@ def change_password():
 def search():
     """For use with JS event listener to filter events on home page"""
     search = request.args["q"]
+    completed = request.args["completed"]
+    if completed == "completed":
+        resolved = True
+    else:
+        resolved = False
     last_30_days = datetime.today() - timedelta(days=30)
     month_forward = datetime.today() + timedelta(days=30)
 
     search_result = (
         Event.query.filter(
             Event.title.ilike(f"%{search}%"),
-            Event.date >= datetime.today(),
+            Event.date > datetime.today() - timedelta(days=7),
+            Event.resolved == resolved,
             Event.date <= month_forward,
         )
         .limit(10)
