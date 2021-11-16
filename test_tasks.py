@@ -131,6 +131,8 @@ class ScheduledTests(TestCase):
         )
         run_tasks(db, os.environ.get("API_KEY"))
 
+        event = Event.query.filter(Event.id == 1)
+        event_updated = True if event[0].resolved == True else False
         db.session.commit()
 
 

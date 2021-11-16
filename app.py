@@ -36,7 +36,7 @@ from models import (
     login_manager,
     Comment
 )
-from forms import RegistrationForm, LoginForm
+from forms import RegistrationForm, LoginForm, DeleteUser, ChangePasswordForm
 from models import User
 from flask_socketio import SocketIO, emit, disconnect
 from variables import clients
@@ -71,24 +71,27 @@ login_manager.init_app(app)
 logging.basicConfig()
 logging.getLogger("apscheduler").setLevel(logging.DEBUG)
 
-if app.config["FLASK_ENV"] == "development":
-    from tasks import run_tasks, update_reload_balance
+# liao's environment: no if
+# if app.config["FLASK_ENV"] == "development":
+from tasks import run_tasks, update_reload_balance
 
-    sched = APScheduler()
-    sched.init_app(app)
-    sched.start()
+sched = APScheduler()
+sched.init_app(app)
+sched.start()
 
-    @sched.task("interval", id="main-job", seconds=1200)
-    def timed_job():
-        with app.app_context():
-            run_tasks(db, app.config["API_KEY"])
-        now = datetime.now()
-        print(f'Running scheduled task at {now.strftime("%H:%M:%S")}')
 
-    @sched.task("interval", id="balance-update", days=7)
-    def balance_update_job():
-        with app.app_context():
-            update_reload_balance(db)
+@sched.task("interval", id="main-job", seconds=120)
+def timed_job():
+    with app.app_context():
+        run_tasks(db, app.config["API_KEY"])
+    now = datetime.now()
+    print(f'Running scheduled task at {now.strftime("%H:%M:%S")}')
+
+
+@sched.task("interval", id="balance-update", days=7)
+def balance_update_job():
+    with app.app_context():
+        update_reload_balance(db)
 
 
 connect_db(app)
@@ -108,7 +111,15 @@ def load_user(userid):
 def render_home_page():
     """Render home page with 10 upcoming events"""
 
-    events = Event.query.filter(Event.date >= date.today()).limit(10)
+    events = (
+        Event.query.filter(
+            Event.date >= datetime.today(),
+            Event.resolved == False,
+            Event.date <= (datetime.today() + timedelta(days=7)),
+        )
+        .order_by(Event.date.asc())
+        .limit(10)
+    )
 
     # if logged in, show user their 10 most recent bets
     last_30_days = datetime.today() - timedelta(days=30)
@@ -151,7 +162,7 @@ def register():
         db.session.add(user)
         db.session.commit()
         flash(
-            f"Account created for {form.email.data}!🙌🏼 You can now log in.", "success"
+            f"Account created for {form.email.data}! 🙌🏼 You can now log in.", "success"
         )
 
         # create UserBalance record in DB
@@ -195,7 +206,7 @@ def logout():
     return redirect(url_for("render_home_page"))
 
 
-@app.route("/account")
+@app.route("/account", methods=["GET", "POST"])
 @login_required
 def account():
     user_balance = convert_to_named_tuple(
@@ -204,20 +215,73 @@ def account():
             {"user_id": current_user.id},
         )
     )[0].balance
-    return render_template("account.html", title="Account", user_balance=user_balance)
+    # if user clicks on the Delete Account button:
+    form = DeleteUser()
+    if form.validate_on_submit():
+        email = current_user.email
+        # delete user_balance row, then delete user from user table
+        db.session.execute(
+            "DELETE FROM user_balance WHERE user_id = :user_id",
+            {"user_id": current_user.id},
+        )
+        db.session.delete(current_user)
+        db.session.commit()
+        flash(f"Account deleted for {email}")
+        return redirect(url_for("render_home_page"))
+    return render_template(
+        "account.html", title="Account", user_balance=user_balance, form=form
+    )
+
+
+@app.route("/change-password", methods=["GET", "POST"])
+@login_required
+def change_password():
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        new_hashed_password = bcrypt.generate_password_hash(
+            form.new_password.data
+        ).decode("utf-8")
+        print(f"new hashed pw: {new_hashed_password}")
+        if bcrypt.check_password_hash(
+            current_user.hashed_password, form.old_password.data
+        ):
+            db.session.execute(
+                "UPDATE users SET hashed_password = :new_hashed_password WHERE id = :user_id",
+                {
+                    "user_id": current_user.id,
+                    "new_hashed_password": new_hashed_password,
+                },
+            )
+            db.session.commit()
+            flash(f"Password successfully changed")
+            return redirect(url_for("account"))
+        else:
+            flash(
+                f"Password change unsuccessful. Please check your password and try again."
+            )
+    return render_template("change-password.html", title="Change Password", form=form)
+
+
+# todo create change-password.html template
 
 
 @app.route("/search")
 def search():
     """For use with JS event listener to filter events on home page"""
     search = request.args["q"]
+    completed = request.args["completed"]
+    if completed == "completed":
+        resolved = True
+    else:
+        resolved = False
     last_30_days = datetime.today() - timedelta(days=30)
     month_forward = datetime.today() + timedelta(days=30)
 
     search_result = (
         Event.query.filter(
             Event.title.ilike(f"%{search}%"),
-            Event.date >= datetime.today(),
+            Event.date > datetime.today() - timedelta(days=7),
+            Event.resolved == resolved,
             Event.date <= month_forward,
         )
         .limit(10)
@@ -276,10 +340,12 @@ def render_event(id):
 
 
 @app.route("/api/bet", methods=["POST"])
-@login_required
 def place_bet():
     """Receives JSON posted from JS event listener with 1) event ID user is betting on 2) user's bet. We can retrieve current user ID from Flask session to update database"""
-    # TODO these routes should be protected/have validation
+
+    if current_user.is_authenticated is False:
+        return json.dumps({"text": "Please login or register to place a bet"})
+
     json_data = json.loads(request.data)
     # get the selection + event ID + amt the user bet
     selection = json_data["selection"]

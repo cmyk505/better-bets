@@ -4,12 +4,60 @@
 {% block stylesheet %}{% endblock %}
 
 {% block content %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <a href="{{ url_for('render_home_page') }}">Home</a>
     <h1>{{ current_user.first_name }}'s Account</h1>
     <ul style="list-style: none;">
-        <li>{{ current_user.first_name }} {{ current_user.last_name }}</li>
-        <li>{{ current_user.email }}</li>
+        <li>Full name: {{ current_user.first_name }} {{ current_user.last_name }}</li>
+        <li>Email: {{ current_user.email }}</li>
         <li>Your account balance is {{ user_balance }}</li>
     </ul>
     <br>
-    <a href="#">Reset password</a>
+    <a href="{{ url_for('change_password') }}">Change Password</a>
+    <hr>
+    <button type='button' class="btn btn-danger" id="myBtn" data-toggle="modal">Delete Account</button>
+    <!-- Modal to confirm account deletion -->
+    <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true" style="display: none">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header" style="text-align:center;">
+            <h4 class="modal-title" style="color:red;" id="deleteModalLabel">Delete Account</h4>
+          </div>
+            <div class="modal-body">
+                <p style="text-align:center">Are you sure? This can't be undone!</p>
+            </div>
+          <div class="modal-footer" style="text-align:center;">
+            <button id='cancel' type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id='modal-confirm'>Delete Account</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.submit(hidden='true', id='form-submit') }}
+            </div>
+    </form>
+
+    <script type="text/javascript">
+        var modal = document.getElementById('myModal');
+        var btn = document.getElementById('myBtn');
+        var cancel = document.getElementById('cancel');
+        btn.onclick = function () {
+            modal.style.display = 'block';
+        }
+        cancel.onclick = function () {
+            modal.style.display = 'none';
+        }
+    </script>
+    <script>
+        $('#modal-confirm').click(function(){
+            // Perform the action after modal confirm button is clicked.
+        $('#form-submit').click(); // submitting the form
+        });
+    </script>
 {% endblock %}
