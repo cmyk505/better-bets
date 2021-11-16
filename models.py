@@ -8,6 +8,7 @@ from flask_login import LoginManager, UserMixin
 from sqlalchemy.orm import relationship
 from sqlalchemy import update
 
+# fmt: off
 
 # using bcrypt for password hashing
 db = SQLAlchemy()
@@ -22,8 +23,7 @@ def connect_db(app):
     # because you're not using .env file
     # if app.config["FLASK_ENV"] == "development":
     #     User.query.delete()
-    #     Event.query.delete()
-    # HEROKU - COMMENT OUT NEXT 3 LINES
+    # Event.query.delete()
     # db.drop_all()
     # db.create_all()
     # seed_database(app, db)
@@ -54,6 +54,7 @@ def seed_database(app, db):
                     datetime=r["strTimestamp"],
                     date=r["dateEvent"],
                     sportsdb_status=r["strStatus"],
+                    strThumb=r["strThumb"],
                 )
             )
         return new_events
@@ -61,11 +62,11 @@ def seed_database(app, db):
     db.session.add_all(add_api_results_to_db())
     db.session.commit()
     # update resolved column for completed games:
-    """this isn't working:
+    """ this isn't working:
     db.session.execute(
         "UPDATE event SET resolved = true WHERE sportsdb_status IN ('FT', 'AOT');"
     )
-    """
+
 
     faker = Faker()
     for _ in range(30):
@@ -77,7 +78,7 @@ def seed_database(app, db):
                 hashed_password="*FAKE*",
             )
         )
-        """
+        
         db.session.add(
         
             (
@@ -90,8 +91,9 @@ def seed_database(app, db):
                 )
             )
         )
-        """
+        
     db.session.commit()
+    """
     # add user ID of 1 to session ID so we can simulate logged-in user activity
 
 
@@ -169,12 +171,12 @@ class Event(db.Model):
     away_score = db.Column(db.Integer)
     datetime = db.Column(db.DateTime)
     sportsdb_status = db.Column(db.String, nullable=False)
-    resolved = db.Column(db.Boolean, default=False)
-    winner = db.Column(db.String(50), default="Undecided")
     date = db.Column(db.Date, nullable=False)
-
+    resolved = db.Column(db.Boolean, default=False)
+    winner = db.Column(db.String(50),default="Undecided")
+    strThumb = db.Column(db.String(500))
     bets = db.relationship("Bet", backref="event_ref")
-
+    # fmt: on
     # write methods
     # 1 call api, use sqlalchemy to get event data, write to db
     # 2 determine the winner
