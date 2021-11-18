@@ -112,9 +112,9 @@ def render_home_page():
 
     events = (
         Event.query.filter(
-            Event.date >= datetime.today(),
+            Event.date >= date.today(),
             Event.resolved == False,
-            Event.date <= (datetime.today() + timedelta(days=7)),
+            Event.date <= (date.today() + timedelta(days=7)),
         )
         .order_by(Event.date.asc())
         .limit(10)
