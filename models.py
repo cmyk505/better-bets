@@ -7,6 +7,9 @@ from faker import Faker
 from flask_login import LoginManager, UserMixin
 from sqlalchemy.orm import relationship
 from sqlalchemy import update
+from datetime import datetime
+import pytz
+
 
 # fmt: off
 
@@ -39,6 +42,18 @@ def seed_database(app, db):
 
         return res.json()
 
+# NOTE: pytz.reference.LocalTimezone() would produce wrong result here
+
+## You could use `tzlocal` module to get local timezone on Unix and Win32
+# from tzlocal import get_localzone # $ pip install tzlocal
+
+# # get local timezone    
+# local_tz = get_localzone()
+    def utc_to_local(utc_dt):
+        local_tz = pytz.timezone('US/Pacific') # use your local timezone name here
+        local_dt = utc_dt.replace(tzinfo=pytz.utc).astimezone(local_tz)
+        return f'{local_dt.year}-{local_dt.month}-{local_dt.day}'
+
     def add_api_results_to_db():
         res = get_all_NBA_events_current_season()
         new_events = []
@@ -52,7 +67,7 @@ def seed_database(app, db):
                     home_score=r["intHomeScore"],
                     away_score=r["intAwayScore"],
                     datetime=r["strTimestamp"],
-                    date=r["dateEvent"],
+                    date=utc_to_local(datetime.strptime(r["dateEvent"], '%Y-%m-%d')),
                     sportsdb_status=r["strStatus"],
                     strThumb=r["strThumb"],
                 )
