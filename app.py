@@ -387,27 +387,7 @@ def place_bet():
             {"text": f"You bet on {selection}. New balance is {new_balance}"}
         )
 
-@app.route("/test/<event>", methods=['POST'])
-def create_comment(event):
-    text = request.args.get("id")
-    if not text:
-        flash("comment can't be created", category = 'error')
-    else:
-        event = Event.query.filter_by(id = text).first()
-    if event:
-        comment = Comment(comment=text, commenter=current_user.id, event = event.id, date = datetime.today())
-        db.session.add(comment)
-        db.session.commit()
-    else:
-        flash("comment can't be created", category = 'error')
 
-    return redirect(url_for('render_home_page'))
-
-'''
-@app.route("/test", methods = ["POST"])
-def test():
-    return "Hello World!!"
-'''
 
 @app.route("/api/bet", methods=["PATCH"])
 def update_bet():
@@ -449,6 +429,26 @@ def reload_balance(id):
         return json.dumps({"balance": balance_record[0].balance, "eligible": True})
     else:
         return json.dumps({"eligible": False})
+
+@app.route("/comment/<event>", methods = ['POST'])
+def create_comment(event):
+    text = request.args.get("id")
+    if not text:
+        flash(f"comment can't be empty", "error")
+    else:
+        event = Event.query.filter_by(id = text).first()
+    if event:
+        comment = Comment(comment = text, commenter = current_user.id, event = event.id, date = datetime.today())
+        db.session.add(comment)
+        db.session.commit()
+        flash(f"Your comment has been successfully created!!! 🙌🏼 ", "success")
+    else:
+        flash(f"event not found", "error")
+
+    return redirect(url_for('render_home_page'))
+
+
+
 
 
 # Route for use testing scheduling functionality
