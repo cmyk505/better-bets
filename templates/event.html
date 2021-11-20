@@ -60,14 +60,25 @@
 
     <script src="../static/event.js"></script>
 
-
-    <div class="panel panel-info">
-        <div class="panel-heading">Viewing comments</div>
-        <div class="panel-body">
-            {% for comment in comments %}
-                {{ comment.commenter }}: {{ comment.comment }}
-                {{ comment.datetime }}
-            {% endfor %}
+    <div class="container">
+        <a href="#view_comments" data-toggle="collapse">
+            <small>View Comments</small>
+        </a>
+        <div id=view_comments class="collapse">
+            <div class="card-body">
+                {% for comment in comments %}
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            {{ comment.comment }}
+                        </div>
+                        <div>
+                            <small class="text-muted">
+                                {{ comment.date }}
+                            </small>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
 
