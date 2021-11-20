@@ -314,6 +314,9 @@ def render_event(id):
             Bet.event == event.id,
             Bet.user_id == current_user.id
         ).first()
+
+        comments = (Comment.query.filter(Comment.event == event.id).limit(20))
+
     else:
         bet = None
     bet_on = False if bet == None else True
@@ -327,7 +330,7 @@ def render_event(id):
         bets = None
 
     return render_template(
-        "event.html", event=event, bet_on=bet_on, bet=bet, bets=bets, result=result
+        "event.html", event=event, bet_on=bet_on, bet=bet, bets=bets, result=result, comments=comments
     )
 
 
@@ -432,20 +435,28 @@ def reload_balance(id):
 
 @app.route("/comment/<event>", methods = ['POST'])
 def create_comment(event):
-    text = request.args.get("id")
+    event_id = request.args.get("id")
+    text = request.form.get("comment")
+    name = request.form.get("name")
     if not text:
         flash(f"comment can't be empty", "error")
     else:
-        event = Event.query.filter_by(id = text).first()
+        event = Event.query.filter_by(id = event_id).first()
     if event:
-        comment = Comment(comment = text, commenter = current_user.id, event = event.id, date = datetime.today())
+        comment = Comment(
+            comment = text,
+            commenter = current_user.id,
+            event = event.id,
+            date = datetime.today(),
+            datetime=datetime.now()
+        )
         db.session.add(comment)
         db.session.commit()
         flash(f"Your comment has been successfully created!!! 🙌🏼 ", "success")
     else:
         flash(f"event not found", "error")
 
-    return redirect(url_for('render_home_page'))
+    return redirect(url_for('render_event', id = event_id))
 
 
 

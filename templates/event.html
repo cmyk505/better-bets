@@ -60,6 +60,17 @@
 
     <script src="../static/event.js"></script>
 
+
+    <div class="panel panel-info">
+        <div class="panel-heading">Viewing comments</div>
+        <div class="panel-body">
+            {% for comment in comments %}
+                {{ comment.commenter }}: {{ comment.comment }}
+                {{ comment.datetime }}
+            {% endfor %}
+        </div>
+    </div>
+
     <div class=container>
         <h2> Create a comment </h2>
         <p>Click on the button below to show the hidden comment form</p>
@@ -71,7 +82,7 @@
                     <form action="/comment/{{ event.id }}?id={{ event.id }}" method="POST">
                         <div class=form-group>
                             <label for="comment">Comment: </label>
-                            <input type="text" id={{ event.id }} name="text" class="form-control"
+                            <input type="text" id={{ event.id }} name="comment" class="form-control"
                                    placeholder="comment something"/>
                         </div>
                         <button name="id" value={{ event.id }} type="submit" class="btn btn-primary">Comment</button>
