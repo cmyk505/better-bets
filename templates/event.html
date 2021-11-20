@@ -1,92 +1,90 @@
 {% extends 'base.html' %}
 
-{% block title %}{{event.home_team}} v {{event.away_team}}{% endblock %}
+{% block title %}{{ event.home_team }} v {{ event.away_team }}{% endblock %}
 
 {% block stylesheet %}
-<link rel="stylesheet" href="../static/event.css">{% endblock %}
+    <link rel="stylesheet" href="../static/event.css">{% endblock %}
 
 {% block content %}
 
-<div id="event-container" class="card">
-    <h3 id="event-header" class="card-header">{{event.title}} on {{event.date}}</h3>
-    <div class="card-body">
-        {% if event.resolved %}
-        <p>Winner: {{event.winner}}</p>
-        {{event.home_team}}: {{event.home_score}}
-        {{event.away_team}}: {{event.away_score}}
-        {% endif %}
-        <form action="submit" id="bet-form">
-            {% if event.resolved == False %}
-            {% if bet_on %}
-            <p>You bet {{bet.amount}} on {{bet.selection}}</p>
-            <p>Result: {{result}}</p>
-            {% else %}
-            <div class="col d-flex justify-content-center">
-                <label class="p-3">Bet </label>
-                <input type="number" name="amount" id="bet-amt" min=1 max=1000 class="mb-3">
-                <label for="bet-selection" class="p-3">on</label>
-                <select name="bet" id="bet-selection" class="mb-3">
-                    <option value="{{event.home_team}}">{{event.home_team}}</option>
-                    <option value="{{event.away_team}}">{{event.away_team}}</option>
-                </select>
+    <div id="event-container" class="card">
+        <h3 id="event-header" class="card-header">{{ event.title }} on {{ event.date }}</h3>
+        <div class="card-body">
+            {% if event.resolved %}
+                <p>Winner: {{ event.winner }}</p>
+                {{ event.home_team }}: {{ event.home_score }}
+                {{ event.away_team }}: {{ event.away_score }}
+            {% endif %}
+            <form action="submit" id="bet-form">
+                {% if event.resolved == False %}
+                    {% if bet_on %}
+                        <p>You bet {{ bet.amount }} on {{ bet.selection }}</p>
+                        <p>Result: {{ result }}</p>
+                    {% else %}
+                        <div class="col d-flex justify-content-center">
+                            <label class="p-3">Bet </label>
+                            <input type="number" name="amount" id="bet-amt" min=1 max=1000 class="mb-3">
+                            <label for="bet-selection" class="p-3">on</label>
+                            <select name="bet" id="bet-selection" class="mb-3">
+                                <option value="{{ event.home_team }}">{{ event.home_team }}</option>
+                                <option value="{{ event.away_team }}">{{ event.away_team }}</option>
+                            </select>
+                        </div>
+
+                        <img src={{ event.strThumb }} alt="logos for NBA teams in event" class="img-fluid">
+                        <button class="btn btn-primary btn-lg" data-event_id={{ event.id }} id="bet-btn">bet</button>
+                    {% endif %}
+                {% endif %}
+                {% if result != 'Undecided' and bet_on %}
+                    <p>Win/loss: {{ bet.final_margin }}</p>
+                {% endif %}
+            </form>
+        </div>
+        <div id="api-response-container">
+            <div id="bet-details"></div>
+        </div>
+        <div class="event-feed">
+            <ul id="recent-bets">
+                {% if bets != None %}
+                    <h3>Recent bets:</h3>
+                    {% for bet in bets %}
+                        <li>${{ bet.amount }} on {{ bet.selection }}
+                            ({{ event.home_team }} vs {{ event.away_team }})
+                        </li>
+                        </li>
+                    {% endfor %}
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+
+    <script src="../static/event.js"></script>
+
+    <div class=container>
+        <h2> Create a comment </h2>
+        <p>Click on the button below to show the hidden comment form</p>
+        <button data-toggle="collapse" data-target="#comment" class="btn btn-primary"> Create a comment</button>
+        <div id="comment" class=collapse>
+            <div class="card">
+                <div class="card-header"> Post your comment to this event using the form below</div>
+                <div class="card-body">
+                    <form action="/comment/{{ event.id }}?id={{ event.id }}" method="POST">
+                        <div class=form-group>
+                            <label for="comment">Comment: </label>
+                            <input type="text" id={{ event.id }} name="text" class="form-control"
+                                   placeholder="comment something"/>
+                        </div>
+                        <button name="id" value={{ event.id }} type="submit" class="btn btn-primary">Comment</button>
+                    </form>
+                </div>
+                <div class="card-footer">
+                    <p> current Date/Time: <span id="datetime"></span></p>
+                    <script>
+                        var dt = new Date();
+                        document.getElementById("datetime").innerHTML = dt.toLocaleString();
+                    </script>
+                </div>
             </div>
-
-            <img src={{event.strThumb}} alt="logos for NBA teams in event" class="img-fluid">
-            <button class="btn btn-primary btn-lg" data-event_id={{event.id}} id="bet-btn">bet</button>
-            {% endif %}
-            {% endif %}
-            {% if result != 'Undecided' and bet_on %}
-            <p>Win/loss: {{bet.final_margin}}</p>
-            {% endif %}
-        </form>
-    </div>
-    <div id="api-response-container">
-        <div id="bet-details"></div>
-    </div>
-    <div class="event-feed">
-        <ul id="recent-bets">
-            {% if bets != None %}
-            <h3>Recent bets:</h3>
-            {% for bet in bets %}
-            <li>${{bet.amount}} on {{bet.selection}}
-                ({{event.home_team}} vs {{event.away_team}})</li>
-            </li>
-            {% endfor %}
-            {% endif %}
-        </ul>
-    </div>
-</div>
-
-<script src="../static/event.js"></script>
-
-{% for comment in event.comments %}
-    <div id="comment-list">
-        <div class="comment-card">
-            <a href="/comment/<event>">
-                <p>{{comments.text}}</p>
-            </a>
-{% endfor %}
-  <form class = "input-group md-3" action = "/comment/{{event.id}}?id={{event.id}}" method = "POST">
-        <div>
-            <label>Name</label>
-            <input name = "Name">
         </div>
-        <br />
-        <div>
-            <label>Email</label>
-            <input name = "Email">
-        </div>
-        <br />
-        <div>
-            <input
-              type ="text"
-              id = {{ event.id }}
-              name="text"
-              class="form-control"
-              placeholder="comment something"
-            />
-        </div>
-        <br />
-        <button name = "id" value = {{ event.id }} type="submit" class = "btn btn-primary">Comment</button>
-</form>
+    </div>
 {% endblock %}
