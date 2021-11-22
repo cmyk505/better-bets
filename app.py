@@ -219,10 +219,14 @@ def account():
     form = DeleteUser()
     if form.validate_on_submit():
         email = current_user.email
-        # delete user_balance row, then delete user from user table
+        # delete user_balance row, any existing bets, then delete user from user table
         db.session.execute(
             "DELETE FROM user_balance WHERE user_id = :user_id",
             {"user_id": current_user.id},
+        )
+        db.session.execute(
+            'DELETE FROM bet WHERE user_id = :user_id',
+            {'user_id': current_user.id},
         )
         db.session.delete(current_user)
         db.session.commit()
