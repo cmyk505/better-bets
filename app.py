@@ -56,7 +56,6 @@ app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
     "DATABASE_URL", os.environ.get("SQLALCHEMY_DATABASE_URI")
 )
-
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 app.config["FLASK_ENV"] = os.environ.get("FLASK_ENV", "development")
 app.config["API_KEY"] = os.environ.get("API_KEY")
@@ -227,7 +226,7 @@ def account():
         )
         db.session.delete(current_user)
         db.session.commit()
-        flash(f"Account deleted for {email}")
+        flash(f"Account deleted for {email}", 'primary')
         return redirect(url_for("render_home_page"))
     return render_template(
         "account.html", title="Account", user_balance=user_balance, form=form

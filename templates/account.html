@@ -14,7 +14,8 @@
     <br>
     <a href="{{ url_for('change_password') }}">Change Password</a>
     <hr>
-    <button type='button' class="btn btn-danger" id="myBtn" data-toggle="modal">Delete Account</button>
+    <!-- Button trigger modal -->
+    <button type='button' class="btn btn-danger" id="myBtn" data-toggle="modal" data-target="#myModal">Delete Account</button>
     <!-- Modal to confirm account deletion -->
     <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true" style="display: none">
       <div class="modal-dialog" role="document">
@@ -41,6 +42,7 @@
     </form>
 
     <script type="text/javascript">
+    debugger;
         var modal = document.getElementById('myModal');
         var btn = document.getElementById('myBtn');
         var cancel = document.getElementById('cancel');
@@ -52,6 +54,7 @@
         }
     </script>
     <script>
+        // debugger;
         $('#modal-confirm').click(function(){
             // Perform the action after modal confirm button is clicked.
         $('#form-submit').click(); // submitting the form
