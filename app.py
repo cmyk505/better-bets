@@ -51,8 +51,9 @@ logging.getLogger("apscheduler").setLevel(logging.DEBUG)
 login_manager = LoginManager()
 login_manager.login_view = "login"
 
-# app = Flask(__name__, instance_path='/Volumes/GoogleDrive/My Drive/Classes/SoftwareDevelopmentPracticum/better-bets/instance')
-app = Flask(__name__)
+app = Flask(__name__, instance_path='/Volumes/GoogleDrive/My Drive/Classes/SoftwareDevelopmentPracticum/better-bets/instance')
+# app = Flask(__name__)
+'''
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
     "DATABASE_URL", os.environ.get("SQLALCHEMY_DATABASE_URI")
 )
@@ -61,6 +62,8 @@ app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 app.config["FLASK_ENV"] = os.environ.get("FLASK_ENV", "development")
 app.config["API_KEY"] = os.environ.get("API_KEY")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:040839@localhost/postgres'
+'''
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:heize_stan@localhost/postgres'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 app.config["SECRET_KEY"] = "my secret"
@@ -191,10 +194,10 @@ def login():
             login_user(
                 user, remember=False
             )  # by default, the user is logged out if browser is closed
-            flash(f"Hi {user.first_name}! You are logged in.")
+            flash(f"Hi {user.first_name}! You are logged in.", 'success')
             return redirect(url_for("render_home_page"))
         else:
-            flash(f"Login Unsuccessful. Please check email and password")
+            flash(f"Login unsuccessful. Please check email and password.", 'danger')
     return render_template("login.html", title="Login", form=form)
 
 
@@ -202,7 +205,7 @@ def login():
 @login_required
 def logout():
     logout_user()
-    flash("You've logged out")
+    flash("You've logged out.", 'primary')
     return redirect(url_for("render_home_page"))
 
 
@@ -257,7 +260,7 @@ def change_password():
             return redirect(url_for("account"))
         else:
             flash(
-                f"Password change unsuccessful. Please check your password and try again."
+                f"Password change unsuccessful. Please check your password and try again.", 'danger'
             )
     return render_template("change-password.html", title="Change Password", form=form)
 
