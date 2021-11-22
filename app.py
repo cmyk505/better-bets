@@ -51,9 +51,8 @@ logging.getLogger("apscheduler").setLevel(logging.DEBUG)
 login_manager = LoginManager()
 login_manager.login_view = "login"
 
-app = Flask(__name__, instance_path='/Volumes/GoogleDrive/My Drive/Classes/SoftwareDevelopmentPracticum/better-bets/instance')
-# app = Flask(__name__)
-'''
+# app = Flask(__name__, instance_path='/Volumes/GoogleDrive/My Drive/Classes/SoftwareDevelopmentPracticum/better-bets/instance')
+app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
     "DATABASE_URL", os.environ.get("SQLALCHEMY_DATABASE_URI")
 )
@@ -61,9 +60,8 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 app.config["FLASK_ENV"] = os.environ.get("FLASK_ENV", "development")
 app.config["API_KEY"] = os.environ.get("API_KEY")
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:040839@localhost/postgres'
-'''
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:heize_stan@localhost/postgres'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:040839@localhost/postgres'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:heize_stan@localhost/postgres'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 app.config["SECRET_KEY"] = "my secret"
