@@ -215,6 +215,25 @@ def account():
             {"user_id": current_user.id},
         )
     )[0].balance
+    # display bet history
+    bets = (
+        Bet.query.filter(
+            Bet.user_id == current_user.id
+        )
+    )
+    if bets:
+        bets_events = []
+        for bet in bets:
+            bets_events.append(
+                {
+                    "event": (Event.query.filter(Event.id == bet.event)).first(),
+                    "bet": bet,
+                    'event_date': event_date,
+                    'selection': selection,
+                    'amount': amount
+                }
+            )
+
     # if user clicks on the Delete Account button:
     form = DeleteUser()
     if form.validate_on_submit():
@@ -233,7 +252,7 @@ def account():
         flash(f"Account deleted for {email}", 'primary')
         return redirect(url_for("render_home_page"))
     return render_template(
-        "account.html", title="Account", user_balance=user_balance, form=form
+        "account.html", title="Account", user_balance=user_balance, form=form, bets_events=bets_events
     )
 
 

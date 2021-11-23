@@ -4,15 +4,36 @@
 {% block stylesheet %}{% endblock %}
 
 {% block content %}
-
-    <h1>{{ current_user.first_name }}'s Account</h1>
+    <br>
+    <h2>{{ current_user.first_name }}'s Account</h2>
     <ul style="list-style: none;">
         <li>Full name: {{ current_user.first_name }} {{ current_user.last_name }}</li>
         <li>Email: {{ current_user.email }}</li>
         <li>Your account balance is {{ user_balance }}</li>
+        <li><a href="{{ url_for('change_password') }}">Change Password</a></li>
     </ul>
-    <br>
-    <a href="{{ url_for('change_password') }}">Change Password</a>
+
+
+    <!-- Active bets table -->
+    <div class="container">
+        <h3>My Active Bets</h3>
+        <table id="activeBets" class="table table-sm table-striped">
+            <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Date</th>
+                    <th>Betting On</th>
+                    <th>Bet Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+
+
+
     <hr>
     <!-- Button trigger modal -->
     <button type='button' class="btn btn-danger" id="myBtn" data-toggle="modal" data-target="#myModal">Delete Account</button>
@@ -42,7 +63,7 @@
     </form>
 
     <script type="text/javascript">
-    debugger;
+    // debugger;
         var modal = document.getElementById('myModal');
         var btn = document.getElementById('myBtn');
         var cancel = document.getElementById('cancel');
