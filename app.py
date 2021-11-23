@@ -215,12 +215,17 @@ def account():
             {"user_id": current_user.id},
         )
     )[0].balance
-    # display bet history
-    bets = (
-        Bet.query.filter(
-            Bet.user_id == current_user.id
-        )
-    )
+    # get bet history
+    def row2dict(row):
+        d = {}
+        for column in row.__table__.columns:
+            d[column.name] = str(getattr(row, column.name))
+
+        return d
+    # Todo:  fix this shit
+    for b in Bet.query.filter(Bet.user_id == current_user.id).all():
+        print(row2dict(b))
+    '''
     if bets:
         bets_events = []
         for bet in bets:
@@ -233,7 +238,7 @@ def account():
                     'amount': amount
                 }
             )
-
+    '''
     # if user clicks on the Delete Account button:
     form = DeleteUser()
     if form.validate_on_submit():
@@ -252,7 +257,7 @@ def account():
         flash(f"Account deleted for {email}", 'primary')
         return redirect(url_for("render_home_page"))
     return render_template(
-        "account.html", title="Account", user_balance=user_balance, form=form, bets_events=bets_events
+        "account.html", title="Account", user_balance=user_balance, form=form
     )
 
 
