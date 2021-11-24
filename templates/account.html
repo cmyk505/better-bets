@@ -9,7 +9,7 @@
     <ul style="list-style: none;">
         <li>Full name: {{ current_user.first_name }} {{ current_user.last_name }}</li>
         <li>Email: {{ current_user.email }}</li>
-        <li>Your account balance is {{ user_balance }}</li>
+        <li>Your account balance is <strong>{{ user_balance }}</strong></li>
         <li><a href="{{ url_for('change_password') }}">Change Password</a></li>
     </ul>
 
@@ -17,7 +17,7 @@
     <!-- Active bets table -->
     <div class="container">
         <h3>My Bet History</h3>
-        <table id="activeBets" class="table table-sm table-striped">
+        <table id="betHistory" class="table table-sm table-striped">
             <thead>
                 <tr>
                     <th>Event</th>
@@ -26,8 +26,21 @@
                     <th>Bet Amount</th>
                     <th>Gain/Loss Amount</th>
                 </tr>
-            <!-- Todo: display shit for each row of current user's bets -->
             </thead>
+                {% for bet in bets_events %}
+                <tr>
+                    <td>{{bet['event'].home_team}} vs {{bet['event'].away_team}}</td>
+                    <td>{{bet['bet'].event_date}}</td>
+                    <td>{{bet['bet'].selection}}</td>
+                    <td>{{bet['bet'].amount}}</td>
+                    {% if bet['bet'].final_margin == 0 %}
+                        <td>tbd</td>
+                    {% else %}
+                        <td>{{bet['bet'].final_margin}}</td>
+                    {% endif %}
+
+                </tr>
+                {% endfor %}
             <tbody>
 
             </tbody>

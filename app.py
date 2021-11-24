@@ -209,6 +209,7 @@ def logout():
 @app.route("/account", methods=["GET", "POST"])
 @login_required
 def account():
+    # get user balance
     user_balance = convert_to_named_tuple(
         db.session.execute(
             "SELECT balance FROM user_balance WHERE user_id = :user_id",
@@ -216,29 +217,19 @@ def account():
         )
     )[0].balance
     # get bet history
-    def row2dict(row):
-        d = {}
-        for column in row.__table__.columns:
-            d[column.name] = str(getattr(row, column.name))
+    bets = (
+        None
+        if current_user.is_authenticated is False
+        else Bet.query.filter(Bet.user_id == current_user.id).all()
+    )
 
-        return d
-    # Todo:  fix this shit
-    for b in Bet.query.filter(Bet.user_id == current_user.id).all():
-        print(row2dict(b))
-    '''
-    if bets:
-        bets_events = []
-        for bet in bets:
-            bets_events.append(
-                {
-                    "event": (Event.query.filter(Event.id == bet.event)).first(),
-                    "bet": bet,
-                    'event_date': event_date,
-                    'selection': selection,
-                    'amount': amount
-                }
-            )
-    '''
+    bets_events = []
+    for bet in bets:
+        bets_events.append( {
+            "event": (Event.query.filter(Event.id == bet.event)).first(),
+            "bet": bet,
+            }
+        )
     # if user clicks on the Delete Account button:
     form = DeleteUser()
     if form.validate_on_submit():
@@ -257,7 +248,7 @@ def account():
         flash(f"Account deleted for {email}", 'primary')
         return redirect(url_for("render_home_page"))
     return render_template(
-        "account.html", title="Account", user_balance=user_balance, form=form
+        "account.html", title="Account", user_balance=user_balance, form=form, bets_events=bets_events
     )
 
 
@@ -288,9 +279,6 @@ def change_password():
                 f"Password change unsuccessful. Please check your password and try again.", 'danger'
             )
     return render_template("change-password.html", title="Change Password", form=form)
-
-
-# todo create change-password.html template
 
 
 @app.route("/search")

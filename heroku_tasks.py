@@ -82,7 +82,7 @@ def run_tasks(db, key):
             final_margin = (
                 b.amount if e["winner"].lower() == b.selection.lower() else -b.amount
             )
-            # final margin is positive or negative amoount depending on if user won bet
+            # final margin is positive or negative amount depending on if user won bet
 
             if balance_adjustment.get(b.user_id) is not None:
                 balance_adjustment[b.user_id] = (
