@@ -59,7 +59,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 app.config["FLASK_ENV"] = os.environ.get("FLASK_ENV", "development")
 app.config["API_KEY"] = os.environ.get("API_KEY")
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:040839@localhost/postgres'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:040839@localhost/postgres'
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:heize_stan@localhost/postgres'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
@@ -331,12 +331,12 @@ def render_event(id):
             Bet.user_id == current_user.id
         ).first()
 
-        comments = (Comment.query.filter(Comment.event == event.id).limit(20))
-
     else:
         bet = None
     bet_on = False if bet == None else True
     result = event.winner
+
+    comments = (Comment.query.filter(Comment.event == event.id).limit(20).all())
 
     # get 5 most recent bets on event
 
