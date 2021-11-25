@@ -15,7 +15,8 @@ document
     if (res.eligible) {
       resultsDiv.innerText = `Balance reloaded. New balance is ${res.balance}`;
     } else {
-      resultsDiv.innerText = `Not currently eligible to reload balance. You can reload your balance once a week`;
+      resultsDiv.innerText = `Not currently eligible to reload balance. You can reload your balance once a week.`;
+      // document.getElementById("reload-balance-btn").innerHTML = '';
     }
     document.querySelector("#reload-balance-btn").disabled = true;
     document.querySelector("#balance-info-container").append(resultsDiv);

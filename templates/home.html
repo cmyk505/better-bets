@@ -14,14 +14,12 @@
         <a href="{{ url_for('register') }}">Register</a>
     </div>
     {% else %}
-    <a href="{{ url_for('account') }}">Account</a>
-    <a href="{{ url_for('logout') }}">Log out</a>
-
+        <a href="{{ url_for('account') }}">Account</a>
+        <a href="{{ url_for('logout') }}">Log out</a>
     {% endif %}
-
     <div class="bet-container">
         {% if bets_events %}
-        <h1>Your recent bets:</h1>
+        <h2>Your recent bets:</h2>
         <ul id="bet-ul">
             {% for bet in bets_events %}
             <li><a href="/event/{{bet['event'].id}}">${{bet['bet'].amount}} on {{bet['bet'].selection}}
@@ -33,13 +31,13 @@
 
     <div id="balance-info-container">
         {% if current_user.is_authenticated %}
-        <button id="reload-balance-btn" data-user={{current_user.id}}>Reload Balance</button>
+        <button type="button" id="reload-balance-btn" data-user={{current_user.id}} class="btn btn-outline-secondary">Reload Balance</button>
         {% else %}
         <button id="reload-balance-btn" class="hidden">Reload Balance</button>
         {% endif %}
     </div>
 
-    <div class="event-container">
+    <div class="event-container"  style="width: 50%;">
         <h1 id="event-header">events</h1>
         <label for="search-events" id="search-events">Search</label>
         <input type="text" id="search-events">
@@ -50,16 +48,22 @@
         </select>
         {% for event in events %}
         <div id="event-list">
-            <div class="event-card">
+            <div class="card">
                 <a href="/event/{{event.id}}">
-                    <p>{{event.title}}</p>
+                    <img class="card-img-top max-width:50% bg-secondary" src={{ event.strThumb }} alt="Card image cap">
                 </a>
-                <ul>
-                    <li>{{event.home_team}} vs {{event.away_team}}</li>
-                    <li>{{event.date}}</li>
-                </ul>
+                <div class="card-header">
+                    <a href="/event/{{event.id}}">
+                        {{event.title}}
+                    </a>
+                    {{event.datetime}} UTC
+                </div>
+                <div class='card-body'>
+
+                </div>
             </div>
         </div>
+        <br>
         {% endfor %}
     </div>
 </div>
