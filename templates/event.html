@@ -61,52 +61,65 @@
     <script src="../static/event.js"></script>
 
     <div class="container">
-        <a href="#view_comments" data-toggle="collapse">
-            <small>View Comments</small>
-        </a>
-        <div id=view_comments class="collapse">
-            <div class="card-body">
-                {% for comment in comments %}
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            {{ comment.comment }}
+        {% if comments|length > 0 %}
+            <a href="#view_comments" data-toggle="collapse">
+                <small>View {{ comments|length }} Comments</small>
+            </a>
+            <div id=view_comments class="collapse">
+                <div class="card-body">
+                    {% for comment in comments %}
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                {{ comment.comment }}
+                            </div>
+                            <div>
+                                <small class="text-muted">
+                                    {{ comment.date }}
+                                </small>
+                            </div>
                         </div>
-                        <div>
-                            <small class="text-muted">
-                                {{ comment.date }}
-                            </small>
-                        </div>
-                    </div>
-                {% endfor %}
+                    {% endfor %}
+                </div>
             </div>
-        </div>
+        {% else %}
+            <div class="alert alert-info">
+                There are no comments related to this event.
+            </div>
+        {% endif %}
     </div>
 
     <div class=container>
         <h2> Create a comment </h2>
         <p>Click on the button below to show the hidden comment form</p>
-        <button data-toggle="collapse" data-target="#comment" class="btn btn-primary"> Create a comment</button>
-        <div id="comment" class=collapse>
-            <div class="card">
-                <div class="card-header"> Post your comment to this event using the form below</div>
-                <div class="card-body">
-                    <form action="/comment/{{ event.id }}?id={{ event.id }}" method="POST">
-                        <div class=form-group>
-                            <label for="comment">Comment: </label>
-                            <input type="text" id={{ event.id }} name="comment" class="form-control"
-                                   placeholder="comment something"/>
-                        </div>
-                        <button name="id" value={{ event.id }} type="submit" class="btn btn-primary">Comment</button>
-                    </form>
-                </div>
-                <div class="card-footer">
-                    <p> current Date/Time: <span id="datetime"></span></p>
-                    <script>
-                        var dt = new Date();
-                        document.getElementById("datetime").innerHTML = dt.toLocaleString();
-                    </script>
+        {% if current_user.is_authenticated %}
+            <button data-toggle="collapse" data-target="#comment" class="btn btn-primary"> Create a comment</button>
+            <div id="comment" class=collapse>
+                <div class="card">
+                    <div class="card-header"> Post your comment to this event using the form below</div>
+                    <div class="card-body">
+                        <form action="/comment/{{ event.id }}?id={{ event.id }}" method="POST">
+                            <div class=form-group>
+                                <label for="comment">Comment: </label>
+                                <input type="text" id={{ event.id }} name="comment" class="form-control"
+                                       placeholder="comment something"/>
+                            </div>
+                            <button name="id" value={{ event.id }} type="submit" class="btn btn-primary">Comment
+                            </button>
+                        </form>
+                    </div>
+                    <div class="card-footer">
+                        <p> current Date/Time: <span id="datetime"></span></p>
+                        <script>
+                            var dt = new Date();
+                            document.getElementById("datetime").innerHTML = dt.toLocaleString();
+                        </script>
+                    </div>
                 </div>
             </div>
-        </div>
+        {% else %}
+            <div class="alert alert-warning">
+                <strong>Warning!</strong> You can't create a comment yet. Please log in or sign up to create a comment.
+            </div>
+        {% endif %}
     </div>
 {% endblock %}
