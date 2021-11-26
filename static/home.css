@@ -11,3 +11,11 @@
 .hidden {
   display: none;
 }
+
+/*Using media to set the style If screen is bigger than 800px*/
+@media screen and (min-width: 800px) {
+  .event-container {
+    max-width: 600px;/*Limit max-width to 600px*/
+    margin: 0 auto;/*Centering this container*/
+  }
+}
