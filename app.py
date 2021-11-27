@@ -8,7 +8,7 @@ from flask import (
     jsonify,
     session,
 )
-
+from flask_talisman import Talisman
 from helpers import convert_to_named_tuple
 
 from flask_login import (
@@ -53,6 +53,8 @@ login_manager.login_view = "login"
 
 # app = Flask(__name__, instance_path='/Volumes/GoogleDrive/My Drive/Classes/SoftwareDevelopmentPracticum/better-bets/instance')
 app = Flask(__name__)
+# implementing Talisman to force SSL
+Talisman(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
     "DATABASE_URL", os.environ.get("SQLALCHEMY_DATABASE_URI")
 )
