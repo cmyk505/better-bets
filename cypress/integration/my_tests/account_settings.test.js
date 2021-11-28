@@ -49,4 +49,26 @@ describe("tests for account settings page", () => {
     cy.get("input[id=confirm_new_password]").type("tristan1");
     cy.get("input").contains("Submit").click();
   });
+
+  it("lets you delete your account", () => {
+    cy.get("button").contains("Delete Account").click();
+    // click again to confirm deletion on modal
+
+    const el = cy.get("#modal-confirm");
+    el.click();
+    // link should change indicating redirect and successful deletion
+    cy.on("url:changed", () => {
+      cy.contains("Account deleted");
+    });
+  });
+
+  it.only("displays bet history", () => {
+    cy.contains("Better Bets").click();
+    cy.get("a").contains("vs").first().click();
+    cy.get("input[id=bet-amt]").type(100);
+    cy.get("button").contains("bet").click();
+
+    cy.visit("/account");
+    cy.get("td").contains(100);
+  });
 });

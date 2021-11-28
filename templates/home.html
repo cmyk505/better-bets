@@ -21,13 +21,18 @@
 
     <div class="bet-container">
         {% if bets_events %}
-        <h1>Your recent bets:</h1>
-        <ul id="bet-ul">
-            {% for bet in bets_events %}
-            <li><a href="/event/{{bet['event'].id}}">${{bet['bet'].amount}} on {{bet['bet'].selection}}
-                    ({{bet['event'].home_team}} vs {{bet['event'].away_team}})</a></li>
-            {% endfor %}
-        </ul>
+        <button type="button" class="btn btn-primary ml-auto" data-toggle="collapse" data-target="#recentBets"
+            aria-expanded="false">
+            Your recent bets <span class="badge badge-light">{{bets_events | count}}</span>
+        </button>
+        <div class="collapse" id="recentBets">
+            <ul id="bet-ul">
+                {% for bet in bets_events %}
+                <li><a href="/event/{{bet['event'].id}}">${{bet['bet'].amount}} on {{bet['bet'].selection}}
+                        ({{bet['event'].home_team}} vs {{bet['event'].away_team}})</a></li>
+                {% endfor %}
+            </ul>
+        </div>
         {% endif %}
     </div>
 
@@ -40,7 +45,7 @@
     </div>
 
     <div class="event-container">
-        <h1 id="event-header">events</h1>
+        <h2 id="event-header">Events</h2>
         <label for="search-events" id="search-events">Search</label>
         <input type="text" id="search-events">
         <label for="completion-filter" class="">Game status</label>

@@ -34,7 +34,7 @@ from models import (
     LoginManager,
     UserMixin,
     login_manager,
-    Comment
+    Comment,
 )
 from forms import RegistrationForm, LoginForm, DeleteUser, ChangePasswordForm
 from models import User
@@ -71,13 +71,12 @@ login_manager.init_app(app)
 logging.basicConfig()
 logging.getLogger("apscheduler").setLevel(logging.DEBUG)
 
-# liao's environment: no if
-# if app.config["FLASK_ENV"] == "development":
-from tasks import run_tasks, update_reload_balance
+if app.config["FLASK_ENV"] == "development":
+    from tasks import run_tasks, update_reload_balance
 
-sched = APScheduler()
-sched.init_app(app)
-sched.start()
+    sched = APScheduler()
+    sched.init_app(app)
+    sched.start()
 
 
 @sched.task("interval", id="main-job", seconds=120)
@@ -103,6 +102,7 @@ def stop():
 
 @login_manager.user_loader
 def load_user(userid):
+    """Returns user record from database"""
     user_id = int(userid)
     return User.query.get(user_id)
 
@@ -148,6 +148,7 @@ def render_home_page():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    """Handles get and post requests to user registration route"""
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode(
@@ -182,6 +183,7 @@ def register():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    """Handles get and post requests to user login route"""
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -191,24 +193,26 @@ def login():
             login_user(
                 user, remember=False
             )  # by default, the user is logged out if browser is closed
-            flash(f"Hi {user.first_name}! You are logged in.", 'success')
+            flash(f"Hi {user.first_name}! You are logged in.", "success")
             return redirect(url_for("render_home_page"))
         else:
-            flash(f"Login unsuccessful. Please check email and password.", 'danger')
+            flash(f"Login unsuccessful. Please check email and password.", "danger")
     return render_template("login.html", title="Login", form=form)
 
 
 @app.route("/logout")
 @login_required
 def logout():
+    """Handles get request to logout route"""
     logout_user()
-    flash("You've logged out.", 'primary')
+    flash("You've logged out.", "primary")
     return redirect(url_for("render_home_page"))
 
 
 @app.route("/account", methods=["GET", "POST"])
 @login_required
 def account():
+    """Gets user balance, bet history and displays account settings page. Also handles post requests for account deletion"""
     # get user balance
     user_balance = convert_to_named_tuple(
         db.session.execute(
@@ -225,9 +229,10 @@ def account():
 
     bets_events = []
     for bet in bets:
-        bets_events.append( {
-            "event": (Event.query.filter(Event.id == bet.event)).first(),
-            "bet": bet,
+        bets_events.append(
+            {
+                "event": (Event.query.filter(Event.id == bet.event)).first(),
+                "bet": bet,
             }
         )
     # if user clicks on the Delete Account button:
@@ -240,21 +245,44 @@ def account():
             {"user_id": current_user.id},
         )
         db.session.execute(
-            'DELETE FROM bet WHERE user_id = :user_id',
-            {'user_id': current_user.id},
+            "DELETE FROM bet WHERE user_id = :user_id",
+            {"user_id": current_user.id},
         )
         db.session.delete(current_user)
         db.session.commit()
-        flash(f"Account deleted for {email}", 'primary')
+        flash(f"Account deleted for {email}", "primary")
         return redirect(url_for("render_home_page"))
     return render_template(
-        "account.html", title="Account", user_balance=user_balance, form=form, bets_events=bets_events
+        "account.html",
+        title="Account",
+        user_balance=user_balance,
+        form=form,
+        bets_events=bets_events,
     )
+
+
+@app.route("/account/get-account-history")
+@login_required
+def get_account_history():
+    # called from the FE by JS - queries database for user's win/loss stats
+    mapped_stats = {"win": 0, "loss": 0}
+    db_res = convert_to_named_tuple(
+        db.session.execute(
+            "SELECT final_margin FROM bet WHERE user_id = :id", {"id": current_user.id}
+        )
+    )
+    for res in db_res:
+        if res.final_margin > 0:
+            mapped_stats["win"] = mapped_stats.get("win") + res.final_margin
+        else:
+            mapped_stats["loss"] = mapped_stats.get("loss") + res.final_margin
+    return json.dumps(mapped_stats)
 
 
 @app.route("/change-password", methods=["GET", "POST"])
 @login_required
 def change_password():
+    """Handles get and post requests to change password route"""
     form = ChangePasswordForm()
     if form.validate_on_submit():
         new_hashed_password = bcrypt.generate_password_hash(
@@ -276,7 +304,8 @@ def change_password():
             return redirect(url_for("account"))
         else:
             flash(
-                f"Password change unsuccessful. Please check your password and try again.", 'danger'
+                f"Password change unsuccessful. Please check your password and try again.",
+                "danger",
             )
     return render_template("change-password.html", title="Change Password", form=form)
 
@@ -319,6 +348,7 @@ def search():
 
 @app.route("/event/<id>")
 def render_event(id):
+    """Renders a specific event based on id parameter in link"""
     event = Event.query.get(id)
 
     # redirect to home if event does not exist
@@ -327,11 +357,10 @@ def render_event(id):
 
     if event is not None and current_user.is_authenticated:
         bet = Bet.query.filter(
-            Bet.event == event.id,
-            Bet.user_id == current_user.id
+            Bet.event == event.id, Bet.user_id == current_user.id
         ).first()
 
-        comments = (Comment.query.filter(Comment.event == event.id).limit(20))
+        comments = Comment.query.filter(Comment.event == event.id).limit(20)
 
     else:
         bet = None
@@ -346,13 +375,14 @@ def render_event(id):
         bets = None
 
     return render_template(
-        "event.html", event=event, bet_on=bet_on, bet=bet, bets=bets, result=result, comments=comments
+        "event.html",
+        event=event,
+        bet_on=bet_on,
+        bet=bet,
+        bets=bets,
+        result=result,
+        comments=comments,
     )
-
-
-# @app.route("/account")
-# def render_account():
-#     return render_template('account.html')
 
 
 # API endpoints called from JS event listener to make bet
@@ -407,7 +437,6 @@ def place_bet():
         )
 
 
-
 @app.route("/api/bet", methods=["PATCH"])
 def update_bet():
     """Receives JSON posted from scheduled task with 1) event ID 2) resolution to bet and then updates database"""
@@ -449,22 +478,24 @@ def reload_balance(id):
     else:
         return json.dumps({"eligible": False})
 
-@app.route("/comment/<event>", methods = ['POST'])
+
+@app.route("/comment/<event>", methods=["POST"])
 def create_comment(event):
+    """Handles post requests to create comments from event page"""
     event_id = request.args.get("id")
     text = request.form.get("comment")
     name = request.form.get("name")
     if not text:
         flash(f"comment can't be empty", "error")
     else:
-        event = Event.query.filter_by(id = event_id).first()
+        event = Event.query.filter_by(id=event_id).first()
     if event:
         comment = Comment(
-            comment = text,
-            commenter = current_user.id,
-            event = event.id,
-            date = datetime.today(),
-            datetime=datetime.now()
+            comment=text,
+            commenter=current_user.id,
+            event=event.id,
+            date=datetime.today(),
+            datetime=datetime.now(),
         )
         db.session.add(comment)
         db.session.commit()
@@ -472,33 +503,4 @@ def create_comment(event):
     else:
         flash(f"event not found", "error")
 
-    return redirect(url_for('render_event', id = event_id))
-
-
-
-
-
-# Route for use testing scheduling functionality
-
-
-
-
-
-# @app.route("/test_scheduler", methods=["GET"])
-# def render_schedule():
-#     """Renders template with button that calls JS to test scheduling functionality"""
-#     return render_template("test_scheduler.html")
-
-
-# @app.route("/start", methods=["POST"])
-# def schedule_start():
-#     """Runs scheduler"""
-#     start()
-#     return json.dumps({"result": "started"})
-
-
-# @app.route("/stop", methods=["POST"])
-# def schedule_stop():
-#     """Stops scheduler"""
-#     stop()
-#     return json.dumps({"result": "stopped"})
+    return redirect(url_for("render_event", id=event_id))
