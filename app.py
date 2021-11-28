@@ -96,9 +96,15 @@ if app.config["FLASK_ENV"] == "development":
 connect_db(app)
 
 
+@app.errorhandler(404)
+
+# inbuilt function which takes error as parameter
+def not_found(e):
+    # defining function
+    return render_template("404.html")
+
 def stop():
     sched.shutdown()
-
 
 @login_manager.user_loader
 def load_user(userid):
@@ -288,7 +294,6 @@ def change_password():
         new_hashed_password = bcrypt.generate_password_hash(
             form.new_password.data
         ).decode("utf-8")
-        print(f"new hashed pw: {new_hashed_password}")
         if bcrypt.check_password_hash(
             current_user.hashed_password, form.old_password.data
         ):
