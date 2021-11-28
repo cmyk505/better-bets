@@ -8,7 +8,7 @@ from flask import (
     jsonify,
     session,
 )
-
+from flask_talisman import Talisman
 from helpers import convert_to_named_tuple
 
 from flask_login import (
@@ -53,6 +53,8 @@ login_manager.login_view = "login"
 
 # app = Flask(__name__, instance_path='/Volumes/GoogleDrive/My Drive/Classes/SoftwareDevelopmentPracticum/better-bets/instance')
 app = Flask(__name__)
+# implementing Talisman to force SSL
+#Talisman(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
     "DATABASE_URL", os.environ.get("SQLALCHEMY_DATABASE_URI")
 )
@@ -360,12 +362,17 @@ def render_event(id):
             Bet.event == event.id, Bet.user_id == current_user.id
         ).first()
 
+<<<<<<< HEAD
         comments = Comment.query.filter(Comment.event == event.id).limit(20)
 
+=======
+>>>>>>> 6fe5c8e0d4f02f761c3449546ac71a991e37c803
     else:
         bet = None
     bet_on = False if bet == None else True
     result = event.winner
+
+    comments = (Comment.query.filter(Comment.event == event.id).limit(20).all())
 
     # get 5 most recent bets on event
 

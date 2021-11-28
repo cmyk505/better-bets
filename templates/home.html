@@ -14,13 +14,12 @@
         <a href="{{ url_for('register') }}">Register</a>
     </div>
     {% else %}
-    <a href="{{ url_for('account') }}">Account</a>
-    <a href="{{ url_for('logout') }}">Log out</a>
-
+        <a href="{{ url_for('account') }}">Account</a>
+        <a href="{{ url_for('logout') }}">Log out</a>
     {% endif %}
-
     <div class="bet-container">
         {% if bets_events %}
+<<<<<<< HEAD
         <button type="button" class="btn btn-primary ml-auto" data-toggle="collapse" data-target="#recentBets"
             aria-expanded="false">
             Your recent bets <span class="badge badge-light">{{bets_events | count}}</span>
@@ -33,18 +32,28 @@
                 {% endfor %}
             </ul>
         </div>
+=======
+        <h2>Your recent bets:</h2>
+        <ul id="bet-ul">
+            {% for bet in bets_events %}
+            <li><a href="/event/{{bet['event'].id}}">${{bet['bet'].amount}} on {{bet['bet'].selection}}
+                    ({{bet['event'].home_team}} vs {{bet['event'].away_team}})</a></li>
+            {% endfor %}
+        </ul>
+>>>>>>> 6fe5c8e0d4f02f761c3449546ac71a991e37c803
         {% endif %}
     </div>
 
     <div id="balance-info-container">
         {% if current_user.is_authenticated %}
-        <button id="reload-balance-btn" data-user={{current_user.id}}>Reload Balance</button>
+        <button type="button" id="reload-balance-btn" data-user={{current_user.id}} class="btn btn-outline-secondary">Reload Balance</button>
         {% else %}
         <button id="reload-balance-btn" class="hidden">Reload Balance</button>
         {% endif %}
     </div>
 
     <div class="event-container">
+<<<<<<< HEAD
         <h2 id="event-header">Events</h2>
         <label for="search-events" id="search-events">Search</label>
         <input type="text" id="search-events">
@@ -53,18 +62,42 @@
             <option value="incomplete" selected>Incomplete</option>
             <option value="completed">Completed</option>
         </select>
+=======
+        <h1 id="event-header">events</h1>
+        <form class="form-inline text-center">
+            <div class="form-group mb-2">
+                <input type="text" class="form-control" id="search-events" placeholder="Search Events">
+            </div>
+             <div class="form-group mx-sm-3 mb-2">
+                <label for="completion-filter" class="">Game status</label>
+                <select name="completion-filter" id="completion-filter" class="mx-sm-3">
+                    <option value="incomplete" selected>Incomplete</option>
+                    <option value="completed">Completed</option>
+                </select>
+             </div>
+        </form>
+>>>>>>> 6fe5c8e0d4f02f761c3449546ac71a991e37c803
         {% for event in events %}
         <div id="event-list">
-            <div class="event-card">
-                <a href="/event/{{event.id}}">
-                    <p>{{event.title}}</p>
-                </a>
-                <ul>
-                    <li>{{event.home_team}} vs {{event.away_team}}</li>
-                    <li>{{event.date}}</li>
-                </ul>
+            <div class="card bg-light">
+                <div class="row align-items-center">
+                        <div class="col">
+                    <a href="/event/{{event.id}}">
+                        <img class="col" src={{ event.strThumb }} alt="Card image cap">
+                    </a>
+                        </div>
+                    <div class="col">
+
+                        <a href="/event/{{event.id}}">
+                            {{event.title}}
+                        </a>
+                        <div>{{event.datetime}} UTC</div>
+
+                    </div>
+                </div>
             </div>
         </div>
+        <br>
         {% endfor %}
     </div>
 </div>
