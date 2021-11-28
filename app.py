@@ -337,6 +337,8 @@ def search():
         {
             "title": s.title,
             "date": str(s.date),
+            "datetime": str(s.datetime),
+            "strThumb": s.strThumb,
             "id": s.id,
             "home_team": s.home_team,
             "away_team": s.away_team,

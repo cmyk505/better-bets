@@ -48,32 +48,38 @@ document
 
 const addEventsToPage = search => {
   // loops through new events returned by database and adds them to DOM
-  const eventCards = document.querySelectorAll(".event-card");
+  const eventCards = document.querySelectorAll("#event-list");
   for (const ev of eventCards) {
     ev.parentNode.removeChild(ev);
   }
 
   for (const s of search) {
-    let newCard = document.createElement("div");
-    newCard.classList.add("event-card");
-    let a = document.createElement("a");
-    a.href = `/event/${s.id}`;
-    let p = document.createElement("p");
-    a.append(p);
-    p.innerText = s.title;
+    console.log("running new code");
+    document.querySelector(".event-list-container").insertAdjacentHTML(
+      "afterbegin",
+      `
+      <div id="event-list">
+    <div class="card bg-light">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <a href="/event/${s.id}">
+                            <img class="col" src=${s.strThumb} alt="Card image cap">
+                        </a>
+                    </div>
+                    <div class="col">
 
-    let newUl = document.createElement("ul");
-    let teamsLi = document.createElement("li");
-    let dateLi = document.createElement("li");
-    teamsLi.innerText = `${s.home_team} vs ${s.away_team}`;
-    dateLi.innerText = `${s.date}`;
-    newUl.append(teamsLi);
-    newUl.append(dateLi);
+                        <a href="/event/${s.id}">
+                            ${s.title}
+                        </a>
+                        <div>${s.datetime} UTC</div>
 
-    newCard.append(a);
-    newCard.append(newUl);
-
-    document.querySelector("#event-list").append(newCard);
+                    </div>
+                </div>
+            </div>
+        <br>
+        </div>
+    `
+    );
   }
 };
 
