@@ -55,11 +55,11 @@
         <div class="event-list-container">
             {% for event in events %}
             <div id="event-list">
-                <div class="card bg-light">
-                    <div class="row align-items-center">
+                <div class="card bg-light rounded-lg">
+                    <div class="row align-items-center " id="cardRow">
                         <div class="col">
                             <a href="/event/{{event.id}}">
-                                <img class="col" src={{ event.strThumb }} alt="Card image cap">
+                                <img class="col p-3" src={{ event.strThumb }} alt="Card image cap">
                             </a>
                         </div>
                         <div class="col">
