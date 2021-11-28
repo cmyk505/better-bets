@@ -14,8 +14,8 @@
         <a href="{{ url_for('register') }}">Register</a>
     </div>
     {% else %}
-        <a href="{{ url_for('account') }}">Account</a>
-        <a href="{{ url_for('logout') }}">Log out</a>
+    <a href="{{ url_for('account') }}">Account</a>
+    <a href="{{ url_for('logout') }}">Log out</a>
     {% endif %}
     <div class="bet-container">
         {% if bets_events %}
@@ -31,7 +31,8 @@
 
     <div id="balance-info-container">
         {% if current_user.is_authenticated %}
-        <button type="button" id="reload-balance-btn" data-user={{current_user.id}} class="btn btn-outline-secondary">Reload Balance</button>
+        <button type="button" id="reload-balance-btn" data-user={{current_user.id}}
+            class="btn btn-outline-secondary">Reload Balance</button>
         {% else %}
         <button id="reload-balance-btn" class="hidden">Reload Balance</button>
         {% endif %}
@@ -43,36 +44,39 @@
             <div class="form-group mb-2">
                 <input type="text" class="form-control" id="search-events" placeholder="Search Events">
             </div>
-             <div class="form-group mx-sm-3 mb-2">
+            <div class="form-group mx-sm-3 mb-2">
                 <label for="completion-filter" class="">Game status</label>
                 <select name="completion-filter" id="completion-filter" class="mx-sm-3">
                     <option value="incomplete" selected>Incomplete</option>
                     <option value="completed">Completed</option>
                 </select>
-             </div>
+            </div>
         </form>
-        {% for event in events %}
-        <div id="event-list">
-            <div class="card bg-light">
-                <div class="row align-items-center">
+        <div class="event-list-container">
+            {% for event in events %}
+            <div id="event-list">
+                <div class="card bg-light">
+                    <div class="row align-items-center">
                         <div class="col">
-                    <a href="/event/{{event.id}}">
-                        <img class="col" src={{ event.strThumb }} alt="Card image cap">
-                    </a>
+                            <a href="/event/{{event.id}}">
+                                <img class="col" src={{ event.strThumb }} alt="Card image cap">
+                            </a>
                         </div>
-                    <div class="col">
+                        <div class="col">
 
-                        <a href="/event/{{event.id}}">
-                            {{event.title}}
-                        </a>
-                        <div>{{event.datetime}} UTC</div>
+                            <a href="/event/{{event.id}}">
+                                {{event.title}}
+                            </a>
+                            <div>{{event.datetime}} UTC</div>
 
+                        </div>
                     </div>
                 </div>
+                <br>
             </div>
+
+            {% endfor %}
         </div>
-        <br>
-        {% endfor %}
     </div>
 </div>
 <script src="../static/home.js"></script>

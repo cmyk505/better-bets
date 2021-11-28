@@ -1,4 +1,5 @@
 document.querySelector("#bet-form").addEventListener("submit", async e => {
+  // handles form submission for new bets by calling out to Flask route
   e.preventDefault();
   const selectEl = document.querySelector("#bet-selection");
   const selection = selectEl.options[selectEl.selectedIndex].value;

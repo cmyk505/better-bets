@@ -35,4 +35,6 @@ Note that locally, the application is using APScheduler, while in production it 
 
 ### Add to our test suite
 
-Our frontend is tested via Cypress, so to run the existing tests and contrbute, [install Cypress](https://docs.cypress.io/guides/getting-started/installing-cypress).
+Our frontend is tested via Cypress, so to run the existing tests and contrbute, [install Cypress](https://docs.cypress.io/guides/getting-started/installing-cypress). **Alternatively**, you can run the tests in your terminal with Docker via the following command (run in the root directory of the project + replace $PWD as needed if you aren't using bash):
+
+> docker run -it -v $PWD:/e2e -w /e2e cypress/included:3.2.0

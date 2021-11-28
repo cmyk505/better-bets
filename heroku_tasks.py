@@ -8,6 +8,7 @@ import requests
 
 
 def get_event_result(id, key):
+    """Call out to datadb API to get the result of an individual event"""
     required_fields = [
         "idEvent",
         "strEvent",
@@ -38,7 +39,10 @@ def get_event_result(id, key):
 
 
 def run_tasks(db, key):
-    """"""
+    """Function run on a scheduled basis to 1) get unresolved events from DB
+    2) call out to API to check for any resolution for those events 3) based on
+    response from API, update resolved events in database 4) update user balances
+    based on results"""
     # Below query gets all unresolved events with bets
     unresolved_events = convert_to_named_tuple(
         db.session.execute("SELECT sportsdb_id FROM event WHERE resolved = 'f'")
@@ -99,11 +103,12 @@ def run_tasks(db, key):
 
         # For all newly resolved bets, need to update user balance for all linked users
         for (k, v) in balance_adjustment.items():
-            db.session.execute(
-                "UPDATE user_balance SET balance = (balance + :adjustment) WHERE user_id = :user_id",
-                {"adjustment": v, "user_id": k},
-            )
-            db.session.commit()
+            if v > 0:
+                db.session.execute(
+                    "UPDATE user_balance SET balance = (balance + :adjustment) WHERE user_id = :user_id",
+                    {"adjustment": v, "user_id": k},
+                )
+                db.session.commit()
 
 
 # for use on Heroku

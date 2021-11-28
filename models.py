@@ -33,6 +33,7 @@ def connect_db(app):
 
 def seed_database(app, db):
     def get_all_NBA_events_current_season():
+        """Calls out to datadb API for all NBA events for the current season"""
         current_season_str = (
             str(datetime.now().year) + "-" + str(datetime.now().year + 1)
         )
@@ -50,11 +51,13 @@ def seed_database(app, db):
 # # get local timezone    
 # local_tz = get_localzone()
     def utc_to_local(utc_dt):
+        """Convert UTC/GMT to pacific time"""
         local_tz = pytz.timezone('US/Pacific') # use your local timezone name here
         local_dt = utc_dt.replace(tzinfo=pytz.utc).astimezone(local_tz)
         return f'{local_dt.year}-{local_dt.month}-{local_dt.day}'
 
     def add_api_results_to_db():
+        """Add all new NBA events from API into database"""
         res = get_all_NBA_events_current_season()
         new_events = []
         for r in res["events"]:
@@ -76,47 +79,10 @@ def seed_database(app, db):
 
     db.session.add_all(add_api_results_to_db())
     db.session.commit()
-    # update resolved column for completed games:
-    """ this isn't working:
-    db.session.execute(
-        "UPDATE event SET resolved = true WHERE sportsdb_status IN ('FT', 'AOT');"
-    )
-
-
-    faker = Faker()
-    for _ in range(30):
-        db.session.add(
-            User(
-                first_name=faker.first_name(),
-                last_name=faker.last_name(),
-                email=faker.email(),
-                hashed_password="*FAKE*",
-            )
-        )
-        
-        db.session.add(
-        
-            (
-                Event(
-                    sportsdb_id=faker.unique.random_int(),
-                    title=faker.text(100),
-                    home_team=faker.text(10),
-                    away_team=faker.text(10),
-                    date=faker.date_this_month(before_today=False, after_today=True),
-                )
-            )
-        )
-        
-    db.session.commit()
-    """
-    # add user ID of 1 to session ID so we can simulate logged-in user activity
-
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
-
 class User(db.Model, UserMixin):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, unique=True)
@@ -192,12 +158,6 @@ class Event(db.Model):
     strThumb = db.Column(db.String(500))
     bets = db.relationship("Bet", backref="event_ref")
     # fmt: on
-    # write methods
-    # 1 call api, use sqlalchemy to get event data, write to db
-    # 2 determine the winner
-    # 3 function that figures out what events need to updated.
-    # 4 function update the event records with the results
-
 
 class UserBalance(db.Model):
     __tablename__ = "user_balance"
@@ -239,4 +199,3 @@ class Comment(db.Model):
             comment=comment,
             event=event,
         )
-

@@ -4,97 +4,106 @@
 {% block stylesheet %}{% endblock %}
 
 {% block content %}
-    <br>
-    <h2>{{ current_user.first_name }}'s Account</h2>
-    <ul style="list-style: none;">
-        <li>Full name: {{ current_user.first_name }} {{ current_user.last_name }}</li>
-        <li>Email: {{ current_user.email }}</li>
-        <li>Your account balance is <strong>{{ user_balance }}</strong></li>
-        <li><a href="{{ url_for('change_password') }}">Change Password</a></li>
-    </ul>
+<br>
+<h2>{{ current_user.first_name }}'s Account</h2>
+<ul style="list-style: none;">
+    <li>Full name: {{ current_user.first_name }} {{ current_user.last_name }}</li>
+    <li>Email: {{ current_user.email }}</li>
+    <li>Your account balance is <strong>{{ user_balance }}</strong></li>
+    <li><a href="{{ url_for('change_password') }}">Change Password</a></li>
+</ul>
+
+{%if bets_events | length%}
+<div>
+    <canvas id="myChart"></canvas>
+</div>
+{% endif %}
+
+<!-- Active bets table -->
+<div class="container">
+    <h3>My Bet History</h3>
+    <table id="betHistory" class="table table-sm table-striped">
+        <thead>
+            <tr>
+                <th>Event</th>
+                <th>Event Date</th>
+                <th>Winner Selection</th>
+                <th>Bet Amount</th>
+                <th>Gain/Loss Amount</th>
+            </tr>
+        </thead>
+        {% for bet in bets_events %}
+        <tr>
+            <td>{{bet['event'].home_team}} vs {{bet['event'].away_team}}</td>
+            <td>{{bet['bet'].event_date}}</td>
+            <td>{{bet['bet'].selection}}</td>
+            <td>{{bet['bet'].amount}}</td>
+            {% if bet['bet'].final_margin == 0 %}
+            <td>tbd</td>
+            {% else %}
+            <td>{{bet['bet'].final_margin}}</td>
+            {% endif %}
+
+        </tr>
+        {% endfor %}
+        <tbody>
+
+        </tbody>
+    </table>
+</div>
 
 
-    <!-- Active bets table -->
-    <div class="container">
-        <h3>My Bet History</h3>
-        <table id="betHistory" class="table table-sm table-striped">
-            <thead>
-                <tr>
-                    <th>Event</th>
-                    <th>Event Date</th>
-                    <th>Winner Selection</th>
-                    <th>Bet Amount</th>
-                    <th>Gain/Loss Amount</th>
-                </tr>
-            </thead>
-                {% for bet in bets_events %}
-                <tr>
-                    <td>{{bet['event'].home_team}} vs {{bet['event'].away_team}}</td>
-                    <td>{{bet['bet'].event_date}}</td>
-                    <td>{{bet['bet'].selection}}</td>
-                    <td>{{bet['bet'].amount}}</td>
-                    {% if bet['bet'].final_margin == 0 %}
-                        <td>tbd</td>
-                    {% else %}
-                        <td>{{bet['bet'].final_margin}}</td>
-                    {% endif %}
 
-                </tr>
-                {% endfor %}
-            <tbody>
-
-            </tbody>
-        </table>
-    </div>
-
-
-
-    <hr>
-    <!-- Button trigger modal -->
-    <button type='button' class="btn btn-danger" id="myBtn" data-toggle="modal" data-target="#myModal">Delete Account</button>
-    <!-- Modal to confirm account deletion -->
-    <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true" style="display: none">
-      <div class="modal-dialog" role="document">
+<hr>
+<!-- Button trigger modal -->
+<button type='button' class="btn btn-danger" id="myBtn" data-toggle="modal" data-target="#myModal">Delete
+    Account</button>
+<!-- Modal to confirm account deletion -->
+<div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true"
+    style="display: none">
+    <div class="modal-dialog" role="document">
         <div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title" style="color:red" id="deleteModalLabel">Delete Account</h4>
-          </div>
+            <div class="modal-header">
+                <h4 class="modal-title" style="color:red" id="deleteModalLabel">Delete Account</h4>
+            </div>
             <div class="modal-body">
                 Are you sure? This can't be undone!
             </div>
-          <div class="modal-footer" style="text-align:center;">
-            <button id='cancel' type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-primary" id='modal-confirm'>Delete Account</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <form method="POST" action="">
-        {{ form.hidden_tag() }}
-            <div class="form-group">
-                {{ form.submit(hidden='true', id='form-submit') }}
+            <div class="modal-footer" style="text-align:center;">
+                <button id='cancel' type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id='modal-confirm'>Delete Account</button>
             </div>
-    </form>
+        </div>
+    </div>
+</div>
 
-    <script type="text/javascript">
+<form method="POST" action="">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.submit(hidden='true', id='form-submit') }}
+    </div>
+</form>
+
+<script type="text/javascript">
     // debugger;
-        var modal = document.getElementById('myModal');
-        var btn = document.getElementById('myBtn');
-        var cancel = document.getElementById('cancel');
-        btn.onclick = function () {
-            modal.style.display = 'block';
-        }
-        cancel.onclick = function () {
-            modal.style.display = 'none';
-        }
-    </script>
-    <script>
-        // debugger;
-        $('#modal-confirm').click(function(){
-            // Perform the action after modal confirm button is clicked.
+    var modal = document.getElementById('myModal');
+    var btn = document.getElementById('myBtn');
+    var cancel = document.getElementById('cancel');
+    btn.onclick = function () {
+        modal.style.display = 'block';
+    }
+    cancel.onclick = function () {
+        modal.style.display = 'none';
+    }
+</script>
+<script>
+    // debugger;
+    $('#modal-confirm').click(function () {
+        // Perform the action after modal confirm button is clicked.
         $('#form-submit').click(); // submitting the form
-        });
-    </script>
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="../static/account.js"></script>
 
 {% endblock %}

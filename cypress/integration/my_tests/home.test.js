@@ -1,24 +1,3 @@
-// describe("Hooks", function () {
-//   before(function () {
-//     // runs once before all tests in the block
-//     cy.visit("/register");
-//     cy.get("input[id=first_name]").type("tristan");
-//     cy.get("input[id=last_name]").type("tristan");
-//     cy.get("input[id=email]").type(`tristan@tristan.com`);
-//     cy.get("input[id=password]").type("tristan");
-//     cy.get("input[id=confirm_password]").type("tristan");
-//     cy.get("input[id=submit]").click();
-//     cy.on("url:changed", newUrl => {
-//       expect(newUrl).to.equal("http://localhost:5000/login");
-//     });
-//   });
-
-//   after(function () {
-//     cy.visit("/account");
-//     cy.get("button").contains("Delete Account").click();
-//   });
-// });
-
 describe("home page tests", () => {
   beforeEach(() => {
     cy.visit("/");
