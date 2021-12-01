@@ -1,21 +1,30 @@
 {% extends "base.html" %}
 
 {% block title %}Page Not Found{% endblock %}
-{% block stylesheet %}{% endblock %}
+{% block stylesheet %}
+<style>
+.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 70%;
+}
+</style>
+{% endblock %}
 
 {% block content %}
-
-    <div class="jumbotron vertical-center">
+<br>
+    <div class="jumbotron vertical-center" style="background:rgb(60, 60, 60);">
 
       <div class="container text-center">
-        <h2>Oh no! That page doesn't exist!</h2>
+        <h2 style="color:white; ">Oh no! That page doesn't exist!</h2>
         <div class="row align-items-center">
 
             <div class="top-bg"></div>
 
 
 
-            <img src="../static/eyore.gif">
+            <img src="../static/eyore.gif" class="center" alt="Eyore">
 
 
         </div>
