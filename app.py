@@ -95,9 +95,8 @@ if app.config["FLASK_ENV"] == "development":
 
 connect_db(app)
 
-
+"""If user gets a 404 response, redirects to the 404 page"""
 @app.errorhandler(404)
-'''If user gets a 404 response, redirects to the 404 page'''
 # inbuilt function which takes error as parameter
 def not_found(e):
     # defining function
