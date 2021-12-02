@@ -97,7 +97,7 @@ connect_db(app)
 
 
 @app.errorhandler(404)
-
+'''If user gets a 404 response, redirects to the 404 page'''
 # inbuilt function which takes error as parameter
 def not_found(e):
     # defining function
@@ -112,10 +112,9 @@ def load_user(userid):
     user_id = int(userid)
     return User.query.get(user_id)
 
-
 @app.route("/")
 def render_home_page():
-    """Render home page with 10 upcoming events"""
+    """Render home page with 10 upcoming events, recent bets"""
 
     events = (
         Event.query.filter(
@@ -151,7 +150,6 @@ def render_home_page():
 
     return render_template("home.html", events=events, bets_events=bets_events)
 
-
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Handles get and post requests to user registration route"""
@@ -186,7 +184,6 @@ def register():
         return redirect(url_for("login"))
     return render_template("register.html", title="Register", form=form)
 
-
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Handles get and post requests to user login route"""
@@ -205,7 +202,6 @@ def login():
             flash(f"Login unsuccessful. Please check email and password.", "danger")
     return render_template("login.html", title="Login", form=form)
 
-
 @app.route("/logout")
 @login_required
 def logout():
@@ -214,11 +210,10 @@ def logout():
     flash("You've logged out.", "primary")
     return redirect(url_for("render_home_page"))
 
-
 @app.route("/account", methods=["GET", "POST"])
 @login_required
 def account():
-    """Gets user balance, bet history and displays account settings page. Also handles post requests for account deletion"""
+    """Gets user balance, bet history, win/loss chart, and displays account settings page. Also handles post requests for account deletion"""
     # get user balance
     user_balance = convert_to_named_tuple(
         db.session.execute(
@@ -284,7 +279,6 @@ def get_account_history():
             mapped_stats["loss"] = mapped_stats.get("loss") + res.final_margin
     return json.dumps(mapped_stats)
 
-
 @app.route("/change-password", methods=["GET", "POST"])
 @login_required
 def change_password():
@@ -305,7 +299,7 @@ def change_password():
                 },
             )
             db.session.commit()
-            flash(f"Password successfully changed")
+            flash(f"Password successfully changed", 'success')
             return redirect(url_for("account"))
         else:
             flash(
@@ -352,7 +346,6 @@ def search():
     ]
     return json.dumps(s)
 
-
 @app.route("/event/<id>")
 def render_event(id):
     """Renders a specific event based on id parameter in link"""
@@ -393,7 +386,6 @@ def render_event(id):
 
 
 # API endpoints called from JS event listener to make bet
-
 
 @app.route("/api/bet", methods=["POST"])
 def place_bet():

@@ -20,6 +20,7 @@ login_manager = LoginManager()
 
 
 def connect_db(app):
+    '''Attach db to Flask app'''
     db.app = app
     db.init_app(app)
     # liao local environment:  comment out if clause
@@ -84,6 +85,7 @@ def seed_database(app, db):
 def load_user(user_id):
     return User.query.get(int(user_id))
 class User(db.Model, UserMixin):
+    '''User table columns in the database'''
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, unique=True)
     first_name = db.Column(db.String(100))
@@ -101,12 +103,14 @@ class User(db.Model, UserMixin):
 
     @classmethod
     def register(cls, password, email):
+        '''Hash the provided password upon user registration, pass that into the db'''
         hashed_password = bcrypt.generate_password_hash(password)
         hashed_password_utf8 = hashed_password.decode("utf8")
         return cls(hashed_password=hashed_password_utf8, email=email)
 
     @classmethod
     def authenticate(cls, email, password):
+        '''Authentication: check if email and password hash matches db record'''
         user = User.query.filter_by(email=email).first()
         if user and bcrypt.check_password_hash(user.password, password):
             return user
@@ -131,6 +135,7 @@ class User(db.Model, UserMixin):
 
 
 class UserFollow(db.Model):
+    '''User follow model not implemented in final product'''
     __tablename__ = "user_follow"
     id = db.Column(db.Integer, unique=True)
     follower_id = db.Column(
@@ -142,6 +147,7 @@ class UserFollow(db.Model):
 
 
 class Event(db.Model):
+    '''Columns for the event table in db'''
     __tablename__ = "event"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     sportsdb_id = db.Column(db.Integer, nullable=False)
@@ -160,6 +166,7 @@ class Event(db.Model):
     # fmt: on
 
 class UserBalance(db.Model):
+    '''User balance table columns'''
     __tablename__ = "user_balance"
     id = db.Column(db.Integer, primary_key=True, unique=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
@@ -167,6 +174,7 @@ class UserBalance(db.Model):
 
 
 class Bet(db.Model):
+    '''Bet table columns'''
     __tablename__ = "bet"
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
@@ -178,6 +186,7 @@ class Bet(db.Model):
 
 
 class Comment(db.Model):
+    '''Comment table columns'''
     __tablename__ = "comment"
     commenter = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     id = db.Column(db.Integer, primary_key=True, unique=True)
