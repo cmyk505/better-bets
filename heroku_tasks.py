@@ -34,6 +34,8 @@ def get_event_result(id, key):
         else:
             event_info.update({"winner": event_info["strAwayTeam"]})
         event_info.update({"resolved": "true"})
+    else:
+        return False
 
     return event_info
 
@@ -53,7 +55,8 @@ def run_tasks(db, key):
     update_list = []
     for e in unresolved_events:
         res = get_event_result(e.sportsdb_id, key)
-        update_list.append(res)
+        if res:
+            update_list.append(res)
 
     # Need to update database for all events where API call found a result
     # Need to update all unresolved bets linked to events we just resolved
