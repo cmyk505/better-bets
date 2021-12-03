@@ -54,7 +54,6 @@ const addEventsToPage = search => {
   }
 
   for (const s of search) {
-    console.log("running new code");
     document.querySelector(".event-list-container").insertAdjacentHTML(
       "afterbegin",
       `
@@ -71,7 +70,7 @@ const addEventsToPage = search => {
                         <a href="/event/${s.id}">
                             ${s.title}
                         </a>
-                        <div>${s.datetime} UTC</div>
+                        <div>${s.datetime} PST</div>
 
                     </div>
                 </div>
