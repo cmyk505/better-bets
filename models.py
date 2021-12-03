@@ -28,9 +28,9 @@ def connect_db(app):
     # if app.config["FLASK_ENV"] == "development":
     #     User.query.delete()
     # Event.query.delete()
-    # db.drop_all()
-    # db.create_all()
-    # seed_database(app, db)
+    db.drop_all()
+    db.create_all()
+    seed_database(app, db)
 
 def seed_database(app, db):
     def get_all_NBA_events_current_season():
@@ -57,6 +57,12 @@ def seed_database(app, db):
         local_dt = utc_dt.replace(tzinfo=pytz.utc).astimezone(local_tz)
         return f'{local_dt.year}-{local_dt.month}-{local_dt.day}'
 
+    def utc_to_local_datetime(utc_dt):
+        """Convert UTC/GMT to pacific time including time"""
+        local_tz = pytz.timezone('US/Pacific') # use your local timezone name here
+        local_dt = utc_dt.replace(tzinfo=pytz.utc).astimezone(local_tz)
+        return f'{local_dt.year}-{local_dt.month}-{local_dt.day} {local_dt.hour}:{local_dt.minute}:00'
+
     def add_api_results_to_db():
         """Add all new NBA events from API into database"""
         res = get_all_NBA_events_current_season()
@@ -70,7 +76,7 @@ def seed_database(app, db):
                     away_team=r["strAwayTeam"],
                     home_score=r["intHomeScore"],
                     away_score=r["intAwayScore"],
-                    datetime=r["strTimestamp"],
+                    datetime=utc_to_local_datetime(datetime.strptime(r["strTimestamp"][:len(r["strTimestamp"])-6], '%Y-%m-%dT%H:%M:%S')),
                     date=utc_to_local(datetime.strptime(r["dateEvent"], '%Y-%m-%d')),
                     sportsdb_status=r["strStatus"],
                     strThumb=r["strThumb"],
