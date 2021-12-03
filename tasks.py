@@ -89,7 +89,7 @@ def run_tasks(db, key):
 
         for b in bets:
             final_margin = (
-                b.amount if e["winner"].lower() == b.selection.lower() else -b.amount
+                (b.amount * 2) if e["winner"].lower() == b.selection.lower() else 0
             )
             # final margin is positive or negative amoount depending on if user won bet
 
