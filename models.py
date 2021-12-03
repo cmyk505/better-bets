@@ -62,7 +62,7 @@ def seed_database(app, db):
         local_tz = pytz.timezone('US/Pacific') # use your local timezone name here
         local_dt = utc_dt.replace(tzinfo=pytz.utc).astimezone(local_tz)
         minutes = local_dt.minute
-        if minutes == '0' | minutes==0:
+        if minutes == '0' or minutes==0:
             minutes = '00'
         return f'{local_dt.year}-{local_dt.month}-{local_dt.day} {local_dt.hour}:{minutes}:00'
 
