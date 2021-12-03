@@ -61,7 +61,10 @@ def seed_database(app, db):
         """Convert UTC/GMT to pacific time including time"""
         local_tz = pytz.timezone('US/Pacific') # use your local timezone name here
         local_dt = utc_dt.replace(tzinfo=pytz.utc).astimezone(local_tz)
-        return f'{local_dt.year}-{local_dt.month}-{local_dt.day} {local_dt.hour}:{local_dt.minute}:00'
+        minutes = local_dt.minute
+        if minutes == '0':
+            minutes = '00'
+        return f'{local_dt.year}-{local_dt.month}-{local_dt.day} {local_dt.hour}:{minutes}:00'
 
     def add_api_results_to_db():
         """Add all new NBA events from API into database"""
