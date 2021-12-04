@@ -9,6 +9,7 @@ from flask import (
     session,
 )
 from flask_talisman import Talisman
+from functools import wraps
 from helpers import convert_to_named_tuple
 
 from flask_login import (
@@ -95,21 +96,39 @@ if app.config["FLASK_ENV"] == "development":
 
 connect_db(app)
 
+
+def logout_required(function):
+    """Decorator function to redirect logged-in users from specific pages"""
+
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        if current_user.is_authenticated:
+            return redirect("/")
+        return function(*args, **kwargs)
+
+    return wrapper
+
+
 """If user gets a 404 response, redirects to the 404 page"""
+
+
 @app.errorhandler(404)
 # inbuilt function which takes error as parameter
 def not_found(e):
     # defining function
     return render_template("404.html")
 
+
 def stop():
     sched.shutdown()
+
 
 @login_manager.user_loader
 def load_user(userid):
     """Returns user record from database"""
     user_id = int(userid)
     return User.query.get(user_id)
+
 
 @app.route("/")
 def render_home_page():
@@ -149,7 +168,9 @@ def render_home_page():
 
     return render_template("home.html", events=events, bets_events=bets_events)
 
+
 @app.route("/register", methods=["GET", "POST"])
+@logout_required
 def register():
     """Handles get and post requests to user registration route"""
     form = RegistrationForm()
@@ -183,7 +204,9 @@ def register():
         return redirect(url_for("login"))
     return render_template("register.html", title="Register", form=form)
 
+
 @app.route("/login", methods=["GET", "POST"])
+@logout_required
 def login():
     """Handles get and post requests to user login route"""
     form = LoginForm()
@@ -201,6 +224,7 @@ def login():
             flash(f"Login unsuccessful. Please check email and password.", "danger")
     return render_template("login.html", title="Login", form=form)
 
+
 @app.route("/logout")
 @login_required
 def logout():
@@ -208,6 +232,7 @@ def logout():
     logout_user()
     flash("You've logged out.", "primary")
     return redirect(url_for("render_home_page"))
+
 
 @app.route("/account", methods=["GET", "POST"])
 @login_required
@@ -278,6 +303,7 @@ def get_account_history():
             mapped_stats["loss"] = mapped_stats.get("loss") + res.final_margin
     return json.dumps(mapped_stats)
 
+
 @app.route("/change-password", methods=["GET", "POST"])
 @login_required
 def change_password():
@@ -298,7 +324,7 @@ def change_password():
                 },
             )
             db.session.commit()
-            flash(f"Password successfully changed", 'success')
+            flash(f"Password successfully changed", "success")
             return redirect(url_for("account"))
         else:
             flash(
@@ -345,6 +371,7 @@ def search():
     ]
     return json.dumps(s)
 
+
 @app.route("/event/<id>")
 def render_event(id):
     """Renders a specific event based on id parameter in link"""
@@ -385,6 +412,7 @@ def render_event(id):
 
 
 # API endpoints called from JS event listener to make bet
+
 
 @app.route("/api/bet", methods=["POST"])
 def place_bet():
