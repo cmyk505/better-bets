@@ -23,7 +23,7 @@ describe("test user flow for registration", () => {
     cy.get("input[id=confirm_password]").type("password");
     cy.get("input[id=submit]").click();
     cy.on("url:changed", newUrl => {
-      expect(newUrl).to.equal("http://localhost:5000/login");
+      expect(newUrl).to.equal("http://host.docker.internal:5000/login");
     });
   });
 

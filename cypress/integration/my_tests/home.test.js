@@ -4,10 +4,10 @@ describe("home page tests", () => {
   });
 
   it("loads event data", () => {
-    cy.get(".event-card").should("be.visible");
+    cy.get(".event-link").should("be.visible");
 
     //10 most recent events should be loaded
-    expect(cy.get(".event-card").should("have.length", 10));
+    expect(cy.get(".event-link").should("have.length", 10));
   });
 
   it("shows sign in and register links by default", () => {
@@ -16,7 +16,7 @@ describe("home page tests", () => {
   });
 
   it("opens an event page if clicked on", () => {
-    cy.get(".event-card").find("a").first().click();
+    cy.get(".event-link").first().click();
     cy.on("url:changed", newUrl => {
       expect(newUrl).to.contain("/event");
     });

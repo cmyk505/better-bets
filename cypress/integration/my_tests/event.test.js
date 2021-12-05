@@ -2,7 +2,7 @@ describe("tests for specific event page", () => {
   beforeEach(() => {
     // click on first event listed on home page
     cy.visit("/");
-    cy.get(".event-card").find("a").first().click();
+    cy.get(".event-link").first().click();
   });
 
   it("contains input and text box for betting", () => {
@@ -24,10 +24,6 @@ describe("tests for specific event page", () => {
       cy.get("input[id=email]").type("tristan@tristan.com");
       cy.get("input[id=password]").type("tristan");
       cy.get("input").contains("Login").click();
-    });
-
-    it("allows user to place bet", () => {
-      // TODO - since user balance is saved in database and the bet persists, not sure how to test this
     });
   });
 });
