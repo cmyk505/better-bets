@@ -6,3 +6,4 @@ for u in users:
     db.session.execute(
         "UPDATE users SET can_refill_balance = TRUE WHERE id=:id", {"id": u.id}
     )
+    db.session.commit()
