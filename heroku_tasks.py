@@ -58,7 +58,7 @@ def run_tasks(db, key):
     for e in unresolved_events:
         res = get_event_result(e.sportsdb_id, key)
         if res:
-            if res.home_score > 0:
+            if res["intHomeScore"] > 0:
                 update_list.append(res)
 
     # Need to update database for all events where API call found a result
