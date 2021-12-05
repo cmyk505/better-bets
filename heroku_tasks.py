@@ -47,7 +47,9 @@ def run_tasks(db, key):
     based on results"""
     # Below query gets all unresolved events with bets
     unresolved_events = convert_to_named_tuple(
-        db.session.execute("SELECT sportsdb_id FROM event WHERE resolved = 'f'")
+        db.session.execute(
+            "SELECT sportsdb_id FROM event WHERE resolved = 'f' OR (resolved = 't' AND home_score IS NULL)"
+        )
     )
     if len(unresolved_events) == 0:
         return
@@ -56,7 +58,8 @@ def run_tasks(db, key):
     for e in unresolved_events:
         res = get_event_result(e.sportsdb_id, key)
         if res:
-            update_list.append(res)
+            if res.home_score > 0:
+                update_list.append(res)
 
     # Need to update database for all events where API call found a result
     # Need to update all unresolved bets linked to events we just resolved
