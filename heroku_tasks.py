@@ -66,8 +66,14 @@ def run_tasks(db, key):
 
     for e in update_list:
         db.session.execute(
-            "UPDATE event SET winner = :winner, resolved=:resolved WHERE sportsdb_id = :sportsdb_id",
-            {"winner": e["winner"], "resolved": "t", "sportsdb_id": e["idEvent"]},
+            "UPDATE event SET winner = :winner, resolved=:resolved, home_score=:home_score, away_score=:away_score WHERE sportsdb_id = :sportsdb_id",
+            {
+                "winner": e["winner"],
+                "resolved": "t",
+                "sportsdb_id": e["idEvent"],
+                "home_score": e["intHomeScore"],
+                "away_score": e["intAwayScore"],
+            },
         )
         db.session.commit()
 
