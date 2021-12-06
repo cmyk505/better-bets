@@ -96,15 +96,17 @@ def run_tasks(db, key):
 
         for b in bets:
             final_margin = (
-                (b.amount * 2) if e["winner"].lower() == b.selection.lower() else 0
+                (b.amount * 2)
+                if e["winner"].lower() == b.selection.lower()
+                else -b.amount
             )
             # final margin is positive or negative amount depending on if user won bet
 
-            if balance_adjustment.get(b.user_id) is not None:
+            if balance_adjustment.get(b.user_id) is not None and final_margin > 0:
                 balance_adjustment[b.user_id] = (
                     balance_adjustment[b.user_id] + final_margin
                 )
-            else:
+            if balance_adjustment.get(b.user_id) is None and final_margin > 0:
                 balance_adjustment[b.user_id] = final_margin
             db.session.execute(
                 "UPDATE bet SET final_margin=:final_margin WHERE event IN (SELECT id FROM event WHERE id=:id)",
