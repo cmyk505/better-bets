@@ -88,10 +88,10 @@ if app.config["FLASK_ENV"] == "development":
         now = datetime.now()
         print(f'Running scheduled task at {now.strftime("%H:%M:%S")}')
 
-    @sched.task("interval", id="balance-update", days=7)
-    def balance_update_job():
-        with app.app_context():
-            update_reload_balance(db)
+    # @sched.task("interval", id="balance-update", days=7)
+    # def balance_update_job():
+    #     with app.app_context():
+    #         update_reload_balance(db)
 
 
 connect_db(app)

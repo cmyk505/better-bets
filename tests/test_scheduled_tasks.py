@@ -11,8 +11,6 @@ from faker import Faker
 from app import app
 from tasks import run_tasks, get_event_result
 
-# fixtures for pytests below are based on code in https://stackoverflow.com/questions/52233896/database-for-pytest-flask-application-does-not-work-correctly
-
 mock_event_results = {
     "idEvent": 1,
     "strEvent": "something",

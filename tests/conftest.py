@@ -1,9 +1,12 @@
 import pytest
+from flask import template_rendered
 from flask_sqlalchemy import SQLAlchemy
 import app
 import os
 from sqlalchemy import event
 from models import db as _db, User, connect_db
+
+# code for fixtures based on https://stackoverflow.com/questions/52233896/database-for-pytest-flask-application-does-not-work-correctly
 
 
 @pytest.fixture(scope="session")
