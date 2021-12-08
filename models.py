@@ -23,8 +23,6 @@ def connect_db(app):
     """Attach db to Flask app"""
     db.app = app
     db.init_app(app)
-    # liao local environment:  comment out if clause
-    # because you're not using .env file
     # if app.config["FLASK_ENV"] == "development":
     #     User.query.delete()
     # Event.query.delete()
