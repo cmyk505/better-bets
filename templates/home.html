@@ -8,16 +8,6 @@
 
 
 <div class="top-container">
-    <h1>home</h1>
-    {% if current_user.is_authenticated == False %}
-    <div>
-        <a href="{{ url_for('login') }}">Sign In</a>
-        <a href="{{ url_for('register') }}">Register</a>
-    </div>
-    {% else %}
-    <a href="{{ url_for('account') }}">Account</a>
-    <a href="{{ url_for('logout') }}">Log out</a>
-    {% endif %}
     <div class="bet-container">
         {% if bets_events %}
         <h2>Your recent bets:</h2>
@@ -40,7 +30,7 @@
     </div>
 
     <div class="event-container">
-        <h1 id="event-header">events</h1>
+        <h1 id="event-header">Events</h1>
         <form class="form-inline text-center">
             <div class="form-group mb-2">
                 <input type="text" class="form-control" id="search-events" placeholder="Search Events" value={{ query }}>
