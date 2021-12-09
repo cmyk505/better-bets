@@ -9,7 +9,8 @@ import os
 from models import User, Event, Bet, db
 from faker import Faker
 from app import app, render_home_page
-from forms import RegistrationForm
+from forms import RegistrationForm, LoginForm
+from models import User
 
 
 def test_render_home_page(session, test_client):
@@ -38,3 +39,43 @@ def test_registration_post(session, test_client, faker):
         "SELECT user FROM users WHERE email = :email", {"email": form.data["email"]}
     )
     assert added_user
+
+
+def test_account_logged_out(test_client):
+    """Confirm user is redirected if they try to access /account while logged out"""
+    res = test_client.get("/account")
+    assert res.status_code == 302
+
+
+def test_logout_redirect(test_client):
+    """Confirm user is redirected if they try to access /logout while already logged out"""
+    res = test_client.get("/logout")
+    assert res.status_code == 302
+
+
+def test_successful_login(session, test_client, faker):
+    """Tests /login route with info that should succeed"""
+
+    app.config["WTF_CSRF_ENABLED"] = False
+
+    # first create user in DB
+    email = faker.email()
+    session.add(
+        User(
+            first_name=faker.first_name(),
+            last_name=faker.last_name(),
+            email=email,
+            hashed_password="*FAKE*",
+        )
+    )
+    session.commit()
+
+    form = LoginForm()
+
+    form.data["email"] = email
+    form.data["password"] = "*FAKE*"
+    form.data["hashed_password"] = "*FAKE*"
+
+    response = test_client.post("/login", data=form.data)
+
+    assert response.status_code == 200
