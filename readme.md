@@ -1,4 +1,4 @@
-## Better Bets
+## Better Bets - https://better-bets.herokuapp.com
 
 **Gamble on NBA games with fake money**
 
